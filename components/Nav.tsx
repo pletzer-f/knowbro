@@ -15,7 +15,7 @@ export default function Nav() {
 
   return (
     <nav>
-      <Link href="/">Analyse</Link> | <Link href="/companies">My companies</Link> |{" "}
+      <Link href="/">My companies</Link> | <Link href="/analyse">Research a company</Link> |{" "}
       <Link href="/settings">Source preferences</Link> |{" "}
       <button type="button" onClick={signOut}>
         Sign out

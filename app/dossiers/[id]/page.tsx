@@ -115,12 +115,7 @@ export default function SavedDossierPage({ params }: { params: Promise<{ id: str
         <Link href={`/companies/${row.company_id}`}>← {row.company_name} (company page &amp; financial model)</Link>
       </p>
       <p>
-        <small>
-          Saved {new Date(row.created_at).toLocaleString()} · engine config {row.config_fingerprint} ·{" "}
-        </small>
-        <button type="button" onClick={downloadTrace}>
-          Download full reasoning trace (JSON)
-        </button>
+        <small>Saved {new Date(row.created_at).toLocaleString()}</small>
       </p>
       <p>
         <label>
@@ -147,8 +142,6 @@ export default function SavedDossierPage({ params }: { params: Promise<{ id: str
             </label>
           ))}
       </p>
-      <CritiquePanel critique={row.critique} />
-      <hr />
       <DossierView
         dossier={row.dossier}
         lens={lens}
@@ -171,6 +164,17 @@ export default function SavedDossierPage({ params }: { params: Promise<{ id: str
           {noteState === "saving" ? "Saving..." : noteState === "saved" ? "Saved!" : "Save note"}
         </button>
       </p>
+      <hr />
+      <details>
+        <summary>Engine room — how this dossier was made</summary>
+        <p>
+          <button type="button" onClick={downloadTrace}>
+            Download full reasoning trace (JSON)
+          </button>{" "}
+          <small>engine config {row.config_fingerprint}</small>
+        </p>
+        <CritiquePanel critique={row.critique} />
+      </details>
     </main>
   );
 }

@@ -87,7 +87,7 @@ export default function CompanyPage({ params }: { params: Promise<{ id: string }
       <h3>Dossiers</h3>
       {data.dossiers.length === 0 ? (
         <p>
-          No dossiers yet. <Link href={`/?company=${encodeURIComponent(data.company.name)}`}>Run an analysis</Link>.
+          No dossiers yet. <Link href={`/analyse?company=${encodeURIComponent(data.company.name)}`}>Run an analysis</Link>.
         </p>
       ) : (
         <>
@@ -114,7 +114,7 @@ export default function CompanyPage({ params }: { params: Promise<{ id: string }
             </tbody>
           </table>
           <p>
-            <Link href={`/?company=${encodeURIComponent(data.company.name)}`}>Run a new analysis</Link>{" "}
+            <Link href={`/analyse?company=${encodeURIComponent(data.company.name)}`}>Run a new analysis</Link>{" "}
             <small>(adds a new time-stamped dossier under this company)</small>
           </p>
         </>

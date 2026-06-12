@@ -4,6 +4,11 @@ import { analyze } from "@/engine/src/engine";
 // Engine runs 2-3 long model calls; allow plenty of time when self-hosted.
 export const maxDuration = 900;
 
+// Streams NDJSON so the client can show live pass-by-pass progress:
+//   {"type":"progress","phase":"draft","state":"start"}
+//   ...
+//   {"type":"result","result":{...}}   (terminal)
+//   {"type":"error","error":"..."}     (terminal)
 export async function POST(req: NextRequest) {
   let body: { companyName?: string; rawData?: string; userNotes?: string };
   try {
@@ -24,10 +29,25 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  try {
-    const result = await analyze({ companyName, rawData, userNotes: body.userNotes });
-    return NextResponse.json(result);
-  } catch (e) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 500 });
-  }
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    async start(controller) {
+      const emit = (obj: unknown) => controller.enqueue(encoder.encode(JSON.stringify(obj) + "\n"));
+      try {
+        const result = await analyze(
+          { companyName, rawData, userNotes: body.userNotes },
+          { onProgress: (phase, state) => emit({ type: "progress", phase, state }) }
+        );
+        emit({ type: "result", result });
+      } catch (e) {
+        emit({ type: "error", error: (e as Error).message });
+      } finally {
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: { "Content-Type": "application/x-ndjson; charset=utf-8", "Cache-Control": "no-cache" },
+  });
 }
