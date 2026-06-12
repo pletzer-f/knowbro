@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { analyze } from "@/engine/src/engine";
 
-// Engine runs 2-3 long model calls; allow plenty of time when self-hosted.
-export const maxDuration = 900;
+// Engine runs 2-3 long model calls (~5-10 min total). 800s is the ceiling on
+// Vercel Pro fluid compute; measured full runs are ~500-600s.
+export const maxDuration = 800;
 
 // Streams NDJSON so the client can show live pass-by-pass progress:
 //   {"type":"progress","phase":"draft","state":"start"}

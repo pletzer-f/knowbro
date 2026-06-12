@@ -3,9 +3,13 @@
 // costs zero API calls. Lives in .cache/ (gitignored).
 
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 
-const CACHE_DIR = path.join(process.cwd(), ".cache");
+// Local dev: ./.cache. Serverless: the platform tmp dir (per-instance and
+// ephemeral, but still saves repeat calls within an instance's lifetime).
+const CACHE_DIR =
+  process.env.CACHE_DIR ?? (process.env.VERCEL ? path.join(os.tmpdir(), "wba-cache") : path.join(process.cwd(), ".cache"));
 
 function keyToFile(namespace: string, key: string): string {
   const safe = key.toLowerCase().replace(/[^a-z0-9._-]+/g, "_").slice(0, 120);
