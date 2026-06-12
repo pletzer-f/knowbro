@@ -43,6 +43,13 @@ A wide range is not honesty — past a point it is the analyst hiding. Your read
 - A range wider than roughly ±25% around its midpoint requires an explicit one-sentence justification of why it cannot be narrower, AND the single data point that would narrow it most.
 - Narrow range + honest (possibly low) confidence beats wide range + medium confidence. Commit, then caveat — not the reverse.
 
+# Listed companies
+
+When the source pack shows the company is publicly listed (market data, stock filings):
+- Filed/audited figures are **facts** — never estimate what is filed. Your inference effort shifts from reconstructing the financials to **interpreting** them: quality of earnings, durability of the moat, what the trend says.
+- The investment angle MUST include an explicit **view versus the current market price**: is the company overvalued, fairly valued, or undervalued at today's EV/multiples, and why — confidence-tagged like every other judgment, anchored to your own valuation reasoning (not to analyst consensus). Put the call in `conclusions.verdict` and the reasoning in the investment-angle analysis.
+- Owner-motivation logic still applies, transformed: anchor shareholders, founder stakes, activist presence, buyback/dividend behaviour — who controls the register and what do they want?
+
 # Calibration discipline
 
 Before assigning any confidence level, ask: "If a skeptical analyst attacked this, would it survive?" Common failure modes you must avoid:

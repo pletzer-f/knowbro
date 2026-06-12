@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { gatherPublicData } from "@/engine/src/gather";
 import { companiesHouseBlock, companiesHouseConfigured, searchCompanyNumber } from "@/engine/src/sources/companiesHouse";
+import { secEdgarBlock } from "@/engine/src/sources/secEdgar";
+import { fmpBlock, fmpConfigured, fmpPeerMultiples } from "@/engine/src/sources/fmp";
+import { gleifBlock } from "@/engine/src/sources/gleif";
 
 export const maxDuration = 600;
 
@@ -14,6 +17,9 @@ export async function POST(req: NextRequest) {
     companyNumber?: string; // UK company number, optional
     urls?: string[];
     includePeerComps?: boolean;
+    isListed?: boolean;
+    ticker?: string; // for listed companies: enables SEC EDGAR + market data
+    peerTickers?: string[]; // optional listed peers for deterministic multiples
   };
   try {
     body = await req.json();
@@ -66,6 +72,49 @@ export async function POST(req: NextRequest) {
           }
         }
 
+        // 1b. Listed-company connectors (deterministic, day-cached).
+        const ticker = body.ticker?.trim();
+        if (body.isListed && ticker) {
+          if (enabled("sec_edgar")) {
+            try {
+              const block = await secEdgarBlock(ticker, todayIso);
+              if (block) emit(block + "\n\n");
+            } catch (e) {
+              emit(`[SEC EDGAR error: ${(e as Error).message}]\n\n`);
+            }
+          }
+          if (enabled("fmp_market_data")) {
+            if (!fmpConfigured()) {
+              emit("[Note: FMP market data is enabled but FMP_API_KEY is not set in .env.local — skipping.]\n\n");
+            } else {
+              try {
+                const block = await fmpBlock(ticker, todayIso);
+                if (block) emit(block + "\n\n");
+              } catch (e) {
+                emit(`[FMP error: ${(e as Error).message}]\n\n`);
+              }
+            }
+          }
+        }
+        if (body.peerTickers?.length && enabled("fmp_market_data") && fmpConfigured()) {
+          try {
+            const block = await fmpPeerMultiples(body.peerTickers, todayIso);
+            if (block) emit(block + "\n\n");
+          } catch (e) {
+            emit(`[FMP peers error: ${(e as Error).message}]\n\n`);
+          }
+        }
+
+        // 1c. Legal-entity / ownership graph (free, any country, LEI required).
+        if (enabled("gleif")) {
+          try {
+            const block = await gleifBlock(companyName, todayIso);
+            if (block) emit(block + "\n\n");
+          } catch {
+            // GLEIF misses are normal for small private companies — stay silent.
+          }
+        }
+
         // 2. Universal web research (all countries).
         if (enabled("web_research")) {
           await gatherPublicData(
@@ -74,6 +123,7 @@ export async function POST(req: NextRequest) {
               country: body.country,
               urls: body.urls,
               includePeerComps: body.includePeerComps && enabled("peer_comps_web"),
+              isListed: body.isListed,
               todayIso,
             },
             emit

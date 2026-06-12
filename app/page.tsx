@@ -35,6 +35,9 @@ export default function Home() {
   const [ukNumber, setUkNumber] = useState("");
   const [extraUrls, setExtraUrls] = useState("");
   const [withPeerComps, setWithPeerComps] = useState(true);
+  const [isListed, setIsListed] = useState(false);
+  const [ticker, setTicker] = useState("");
+  const [peerTickers, setPeerTickers] = useState("");
   const [gathering, setGathering] = useState(false);
 
   // "Run a new analysis" links from a company page prefill the name.
@@ -96,6 +99,12 @@ export default function Home() {
             .map((u) => u.trim())
             .filter(Boolean),
           includePeerComps: withPeerComps,
+          isListed,
+          ticker: ticker.trim() || undefined,
+          peerTickers: peerTickers
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean),
         }),
       });
       if (!res.ok || !res.body) {
@@ -200,6 +209,21 @@ export default function Home() {
             <label>
               <input type="checkbox" checked={withPeerComps} onChange={(e) => setWithPeerComps(e.target.checked)} />{" "}
               also collect listed-peer multiples
+            </label>
+          </p>
+          <p>
+            <label>
+              <input type="checkbox" checked={isListed} onChange={(e) => setIsListed(e.target.checked)} /> publicly
+              listed company
+            </label>{" "}
+            {isListed && (
+              <label>
+                Ticker <input value={ticker} onChange={(e) => setTicker(e.target.value)} size={8} placeholder="AAPL" />
+              </label>
+            )}{" "}
+            <label>
+              Peer tickers for exact multiples (optional, comma-separated){" "}
+              <input value={peerTickers} onChange={(e) => setPeerTickers(e.target.value)} size={24} placeholder="NIBE-B.ST, 6367.T" />
             </label>
           </p>
           <p>

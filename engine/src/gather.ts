@@ -13,6 +13,8 @@ export interface GatherRequest {
   urls?: string[];
   /** Also collect listed-peer multiples for the financial model. */
   includePeerComps?: boolean;
+  /** The company is publicly listed — shifts gathering toward IR/filings/market data. */
+  isListed?: boolean;
   /** Injected so the pack carries real retrieval dates (prompt stays cacheable). */
   todayIso: string;
 }
@@ -30,6 +32,9 @@ export async function gatherPublicData(req: GatherRequest, onDelta: (text: strin
       : "",
     req.includePeerComps
       ? "Also collect a LISTED PEER MULTIPLES section: 3-6 listed companies in the same sector with current EV/EBITDA (or closest available multiple), each with source and date."
+      : "",
+    req.isListed
+      ? "This company is PUBLICLY LISTED — follow the listed-company priorities (IR figures, market cap/multiples, shareholder structure, guidance)."
       : "",
   ].filter(Boolean);
 

@@ -27,8 +27,26 @@ export const DATA_SOURCES: DataSource[] = [
       "When fetching data, also collect EV/EBITDA multiples of listed sector peers from public financial pages — feeds the model's peer-comp table as a supporting input.",
   },
   {
+    id: "sec_edgar",
+    label: "SEC EDGAR (US listed, official API)",
+    description:
+      "Audited US-GAAP annual figures and filing history for US-registered companies, straight from the SEC. Free, no key.",
+  },
+  {
+    id: "fmp_market_data",
+    label: "Market data via FMP (listed companies)",
+    description:
+      "Price, market cap, valuation multiples, margins for listed companies worldwide; also deterministic peer multiples. Free tier (250 calls/day) — responses are day-cached to stay frugal. Needs FMP_API_KEY.",
+  },
+  {
+    id: "gleif",
+    label: "GLEIF legal-entity register",
+    description:
+      "Global LEI lookup: legal identity and reported parent/ultimate-parent relationships. Free, no key. Mostly hits larger entities.",
+  },
+  {
     id: "sp_global_comps",
     label: "S&P Global comparables (deferred)",
-    description: "Professional comps feed — integrates when credentials are available. Until then, peer multiples come from the web or by hand.",
+    description: "Professional comps feed — integrates when credentials are available. Until then, peer multiples come from the web, FMP, or by hand.",
   },
 ];
