@@ -112,7 +112,8 @@ export default function SavedDossierPage({ params }: { params: Promise<{ id: str
   return (
     <main>
       <p>
-        <Link href={`/companies/${row.company_id}`}>← {row.company_name} (company page &amp; financial model)</Link>
+        <Link href={`/companies/${row.company_id}`}>← {row.company_name} (company page &amp; financial model)</Link> ·{" "}
+        <Link href={`/dossiers/${row.id}/export`}>Export PDF</Link>
       </p>
       <p>
         <small>Saved {new Date(row.created_at).toLocaleString()}</small>

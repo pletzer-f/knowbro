@@ -12,7 +12,9 @@ Phase 3: company-scoped chatbot on fresh results and saved dossiers — full dos
 
 Phase 4 (live data): "Fetch public data" on the analyse page — a web-research gather pass (server-side search/fetch through the Anthropic API, no extra keys; works for any country; legitimacy boundary in `engine/config/prompts/gather.md`) plus the official UK Companies House connector (free API; set `COMPANIES_HOUSE_API_KEY`). Optionally collects listed-peer multiples for the model. Everything honours per-user source preferences and streams into the paste box for review before analysing. Plus: "My Companies" with one living financial model per company (Bear/Base/Bull, EV sensitivity, IRR/MoIC, debt paydown, peer comps, promptable metrics) and in-dossier editing with originals preserved.
 
-Not yet built: PDF export (5), then the post-v1 roadmap (living dossier deltas, calibration tracking, forced-seller radar). See `docs/SPEC.md`.
+Phase 5 (PDF export): every saved dossier has an Export page — Long (everything incl. inference paths) / Short (snapshot + investment angle + open questions) / Visual (chart-led from the financial model) variants; lens, sections and a branding line chosen at export time; user edits and overrides are applied. Printing via the browser dialog (Save as PDF).
+
+**v1 is feature-complete.** Use-case structure: home = companies dashboard; /analyse = guided 3-step research flow with live pass-by-pass progress; dossiers read reader-first with the red-team critique in a collapsed "Engine room". Next: the post-v1 roadmap (living dossier deltas, calibration tracking, forced-seller radar) and the separate design pass. See `docs/SPEC.md`.
 
 Supabase project: `wba-company-intel` (`iwqbymyponrhluousixb`, eu-central-1). Provision users at Dashboard → Authentication → Users → Add user (auto-confirm on).
 
