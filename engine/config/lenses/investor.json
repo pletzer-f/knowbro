@@ -1,0 +1,20 @@
+{
+  "id": "investor",
+  "label": "Investor",
+  "audience_description": "Someone evaluating this company as an investment or acquisition target.",
+  "summary_field": "summary",
+  "depth": "full",
+  "section_order": ["snapshot", "investment_angle", "ownership_control", "capital_structure_health", "financial_picture", "business_model", "what_we_dont_know"],
+  "sections_expanded": ["snapshot", "investment_angle", "ownership_control", "what_we_dont_know"],
+  "section_emphasis": {
+    "investment_angle": "high",
+    "ownership_control": "high",
+    "capital_structure_health": "high",
+    "financial_picture": "normal",
+    "business_model": "normal",
+    "what_we_dont_know": "high"
+  },
+  "show_method_detail": true,
+  "show_inference_paths_by_default": false,
+  "intro_note": "Ordered for deal evaluation: angle and deal-killers first, then who owns it and what they want, then the balance sheet."
+}

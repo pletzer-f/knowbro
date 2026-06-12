@@ -1,0 +1,173 @@
+{
+  "$defs": {
+    "confidence": {
+      "type": "object",
+      "properties": {
+        "level": { "type": "string", "enum": ["high", "medium", "low"] },
+        "rationale": { "type": "string", "description": "Why this level — one or two sentences." }
+      },
+      "required": ["level", "rationale"],
+      "additionalProperties": false
+    },
+    "method": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "inputs_used": { "type": "array", "items": { "type": "string" } },
+        "logic": { "type": "string" },
+        "result": { "type": "string" }
+      },
+      "required": ["name", "inputs_used", "logic", "result"],
+      "additionalProperties": false
+    },
+    "estimate": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Stable slug, e.g. revenue-2024e" },
+        "label": { "type": "string" },
+        "value": { "type": "string", "description": "Human-readable with units and period" },
+        "basis": { "type": "string", "enum": ["filed_fact", "estimate", "inference", "user_provided"] },
+        "methods": { "type": "array", "items": { "$ref": "#/$defs/method" } },
+        "reconciliation": { "type": "string", "description": "How methods were combined; '' if single method" },
+        "inference_path": { "type": "array", "items": { "type": "string" }, "description": "Step-by-step reasoning, one sentence per step" },
+        "cross_checks": { "type": "array", "items": { "type": "string" } },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "what_would_raise_confidence": { "type": "array", "items": { "type": "string" } },
+        "caveats": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["id", "label", "value", "basis", "methods", "reconciliation", "inference_path", "cross_checks", "confidence", "what_would_raise_confidence", "caveats"],
+      "additionalProperties": false
+    },
+    "section_core": {
+      "type": "object",
+      "properties": {
+        "summary": { "type": "string" },
+        "plain_language_summary": { "type": "string" },
+        "analysis": { "type": "string" },
+        "key_points": { "type": "array", "items": { "type": "string" } },
+        "estimates": { "type": "array", "items": { "$ref": "#/$defs/estimate" } },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "sources_and_notes": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["summary", "plain_language_summary", "analysis", "key_points", "estimates", "confidence", "sources_and_notes"],
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "properties": {
+    "company_name": { "type": "string" },
+    "data_period_note": { "type": "string", "description": "What period the source data covers and any period assumptions made" },
+    "snapshot": {
+      "type": "object",
+      "properties": {
+        "one_liner": { "type": "string" },
+        "headline_view": { "type": "string", "description": "3-5 sentence top-of-dossier view" },
+        "key_numbers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": { "type": "string" },
+              "value": { "type": "string" },
+              "basis": { "type": "string", "enum": ["filed_fact", "estimate", "inference", "user_provided"] }
+            },
+            "required": ["label", "value", "basis"],
+            "additionalProperties": false
+          }
+        },
+        "overall_confidence": { "$ref": "#/$defs/confidence" }
+      },
+      "required": ["one_liner", "headline_view", "key_numbers", "overall_confidence"],
+      "additionalProperties": false
+    },
+    "business_model": { "$ref": "#/$defs/section_core" },
+    "ownership_control": {
+      "type": "object",
+      "properties": {
+        "summary": { "type": "string" },
+        "plain_language_summary": { "type": "string" },
+        "analysis": { "type": "string" },
+        "key_points": { "type": "array", "items": { "type": "string" } },
+        "estimates": { "type": "array", "items": { "$ref": "#/$defs/estimate" } },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "sources_and_notes": { "type": "array", "items": { "type": "string" } },
+        "owner_motivation_read": { "type": "string", "description": "Decisive conclusion: what the owner probably wants, timeframe, deal implication" }
+      },
+      "required": ["summary", "plain_language_summary", "analysis", "key_points", "estimates", "confidence", "sources_and_notes", "owner_motivation_read"],
+      "additionalProperties": false
+    },
+    "financial_picture": { "$ref": "#/$defs/section_core" },
+    "capital_structure_health": {
+      "type": "object",
+      "properties": {
+        "summary": { "type": "string" },
+        "plain_language_summary": { "type": "string" },
+        "analysis": { "type": "string" },
+        "key_points": { "type": "array", "items": { "type": "string" } },
+        "estimates": { "type": "array", "items": { "$ref": "#/$defs/estimate" } },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "sources_and_notes": { "type": "array", "items": { "type": "string" } },
+        "health_verdict": { "type": "string", "enum": ["healthy", "stretched", "distress_signals_present", "insufficient_data"] }
+      },
+      "required": ["summary", "plain_language_summary", "analysis", "key_points", "estimates", "confidence", "sources_and_notes", "health_verdict"],
+      "additionalProperties": false
+    },
+    "investment_angle": {
+      "type": "object",
+      "properties": {
+        "summary": { "type": "string" },
+        "plain_language_summary": { "type": "string" },
+        "analysis": { "type": "string" },
+        "key_points": { "type": "array", "items": { "type": "string" } },
+        "estimates": { "type": "array", "items": { "$ref": "#/$defs/estimate" } },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "sources_and_notes": { "type": "array", "items": { "type": "string" } },
+        "moat_assessment": { "type": "string" },
+        "exit_thesis": { "type": "string", "description": "Acquirer map + ranked exit routes + multiple context" },
+        "deal_killers": {
+          "type": "array",
+          "description": "Exactly 2 or 3 items — the risks that would genuinely kill the deal",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": { "type": "string" },
+              "rationale": { "type": "string" },
+              "severity": { "type": "string", "enum": ["fatal_if_confirmed", "serious", "manageable"] }
+            },
+            "required": ["title", "rationale", "severity"],
+            "additionalProperties": false
+          }
+        },
+        "verdict": { "type": "string", "description": "The decisive bottom line, 2-4 sentences" }
+      },
+      "required": ["summary", "plain_language_summary", "analysis", "key_points", "estimates", "confidence", "sources_and_notes", "moat_assessment", "exit_thesis", "deal_killers", "verdict"],
+      "additionalProperties": false
+    },
+    "what_we_dont_know": {
+      "type": "object",
+      "properties": {
+        "summary": { "type": "string" },
+        "plain_language_summary": { "type": "string" },
+        "items": {
+          "type": "array",
+          "description": "4-10 gaps ordered by importance",
+          "items": {
+            "type": "object",
+            "properties": {
+              "gap": { "type": "string" },
+              "why_it_matters": { "type": "string" },
+              "diligence_question": { "type": "string", "description": "The concrete question to ask the company / data room" },
+              "how_to_resolve": { "type": "string", "description": "Which legitimate source or request would close this gap" }
+            },
+            "required": ["gap", "why_it_matters", "diligence_question", "how_to_resolve"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["summary", "plain_language_summary", "items"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["company_name", "data_period_note", "snapshot", "business_model", "ownership_control", "financial_picture", "capital_structure_health", "investment_angle", "what_we_dont_know"],
+  "additionalProperties": false
+}

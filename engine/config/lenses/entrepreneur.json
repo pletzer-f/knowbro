@@ -1,0 +1,20 @@
+{
+  "id": "entrepreneur",
+  "label": "Entrepreneur",
+  "audience_description": "An operator or competitor who wants to understand how this company works and where it is exposed.",
+  "summary_field": "summary",
+  "depth": "full",
+  "section_order": ["snapshot", "business_model", "investment_angle", "financial_picture", "ownership_control", "capital_structure_health", "what_we_dont_know"],
+  "sections_expanded": ["snapshot", "business_model", "investment_angle"],
+  "section_emphasis": {
+    "business_model": "high",
+    "investment_angle": "high",
+    "financial_picture": "normal",
+    "ownership_control": "normal",
+    "capital_structure_health": "low",
+    "what_we_dont_know": "normal"
+  },
+  "show_method_detail": true,
+  "show_inference_paths_by_default": false,
+  "intro_note": "Ordered for operators: how the money is made and the competitive position first; moat and threats foregrounded inside the investment angle."
+}
