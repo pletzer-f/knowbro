@@ -53,6 +53,7 @@ export interface EngineConfig {
   critiqueSystemPrompt: string;
   reviseSystemPrompt: string;
   chatSystemPrompt: string;
+  metricsSystemPrompt: string;
   dossierSchema: object;
   critiqueSchema: object;
   models: ModelsConfig;
@@ -76,6 +77,7 @@ export function loadEngineConfig(): EngineConfig {
   const critiquePrompt = read("prompts/critique.md");
   const revisePrompt = read("prompts/revise.md");
   const chatPrompt = read("prompts/chat.md");
+  const metricsPrompt = read("prompts/metrics.md");
 
   const dossierSchema = stripSchemaComments(JSON.parse(read("schema/dossier.schema.json")));
   const critiqueSchema = stripSchemaComments(JSON.parse(read("schema/critique.schema.json")));
@@ -102,6 +104,7 @@ export function loadEngineConfig(): EngineConfig {
     critiquePrompt,
     revisePrompt,
     chatPrompt,
+    metricsPrompt,
     JSON.stringify(dossierSchema),
     JSON.stringify(critiqueSchema),
     JSON.stringify(models),
@@ -113,6 +116,7 @@ export function loadEngineConfig(): EngineConfig {
     critiqueSystemPrompt: stripComments(critiquePrompt),
     reviseSystemPrompt: stripComments(revisePrompt),
     chatSystemPrompt: stripComments(chatPrompt),
+    metricsSystemPrompt: stripComments(metricsPrompt),
     dossierSchema,
     critiqueSchema,
     models,

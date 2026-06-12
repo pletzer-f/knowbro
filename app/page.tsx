@@ -6,6 +6,7 @@
 import { useEffect, useState } from "react";
 import type { AnalysisResult, LensConfig } from "@/engine/src/types";
 import { resolveView } from "@/engine/src/lens";
+import { withEdit, type DossierEdits } from "@/lib/edits";
 import DossierView, { CritiquePanel, type Overrides } from "@/components/DossierView";
 import ChatPanel, { type ChatMsg } from "@/components/ChatPanel";
 
@@ -29,6 +30,13 @@ export default function Home() {
   const [saving, setSaving] = useState(false);
   const [lastLoadedNote, setLastLoadedNote] = useState("");
   const [chatTranscript, setChatTranscript] = useState<ChatMsg[]>([]);
+  const [edits, setEdits] = useState<DossierEdits>({});
+
+  // "Run a new analysis" links from a company page prefill the name.
+  useEffect(() => {
+    const prefill = new URLSearchParams(window.location.search).get("company");
+    if (prefill) setCompanyName(prefill);
+  }, []);
 
   const overridesKey = result ? `wba-overrides:${result.input.companyName}` : null;
 
@@ -69,6 +77,7 @@ export default function Home() {
     setError(null);
     setResult(null);
     setSavedId(null);
+    setEdits({});
     // Persist the note so it's reusable on future analyses of this company.
     if (userNotes.trim()) {
       fetch("/api/notes", {
@@ -197,8 +206,8 @@ export default function Home() {
                 const res = await fetch("/api/dossiers", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
-                  // Chat so far is saved with the dossier and continues there.
-                  body: JSON.stringify({ result, overrides, chat: chatTranscript }),
+                  // Chat + edits so far are saved with the dossier and continue there.
+                  body: JSON.stringify({ result, overrides, edits, chat: chatTranscript }),
                 });
                 const json = await res.json();
                 setSaving(false);
@@ -219,7 +228,15 @@ export default function Home() {
           </p>
           <CritiquePanel critique={result.critique} />
           <hr />
-          <DossierView dossier={result.final} lens={lens} view={view} overrides={overrides} onOverride={handleOverride} />
+          <DossierView
+            dossier={result.final}
+            lens={lens}
+            view={view}
+            overrides={overrides}
+            onOverride={handleOverride}
+            edits={edits}
+            onEdit={(path, value) => setEdits((prev) => withEdit(prev, path, value))}
+          />
           <hr />
           {savedId ? (
             <p>

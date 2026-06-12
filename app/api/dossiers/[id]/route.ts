@@ -11,20 +11,26 @@ export async function GET(_req: NextRequest, { params }: Params) {
   return NextResponse.json(data);
 }
 
-// Update overrides on a saved dossier (estimate edits persist per dossier instance).
+// Update overrides (estimate values) and/or edits (text fields) on a saved dossier.
 export async function PATCH(req: NextRequest, { params }: Params) {
   const { id } = await params;
-  let body: { overrides?: Record<string, string> };
+  let body: {
+    overrides?: Record<string, string>;
+    edits?: Record<string, { value: string; edited_at: string }>;
+  };
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
-  if (!body.overrides || typeof body.overrides !== "object") {
-    return NextResponse.json({ error: "overrides object is required" }, { status: 400 });
+  const patch: Record<string, unknown> = {};
+  if (body.overrides && typeof body.overrides === "object") patch.overrides = body.overrides;
+  if (body.edits && typeof body.edits === "object") patch.edits = body.edits;
+  if (Object.keys(patch).length === 0) {
+    return NextResponse.json({ error: "overrides and/or edits object required" }, { status: 400 });
   }
   const supabase = await createClient();
-  const { error } = await supabase.from("dossiers").update({ overrides: body.overrides }).eq("id", id);
+  const { error } = await supabase.from("dossiers").update(patch).eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }

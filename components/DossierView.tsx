@@ -21,8 +21,11 @@ import type {
   SectionKey,
 } from "@/engine/src/types";
 import { applyLens, lensSummary } from "@/engine/src/lens";
+import EditableText from "@/components/EditableText";
+import type { DossierEdits } from "@/lib/edits";
 
 export type Overrides = Record<string, string>; // estimateId -> overridden value
+export type OnEdit = (path: string, value: string | null) => void;
 
 export function ConfidenceBadge({ confidence, label }: { confidence: Confidence; label?: string }) {
   const [open, setOpen] = useState(false);
@@ -132,20 +135,28 @@ function EstimateView({
 }
 
 function SectionBody({
+  sectionKey,
   section,
   view,
   overrides,
   onOverride,
+  edits,
+  onEdit,
 }: {
+  sectionKey: string;
   section: SectionCore;
   view: LensView;
   overrides: Overrides;
   onOverride: (id: string, value: string | null) => void;
+  edits: DossierEdits;
+  onEdit: OnEdit;
 }) {
+  const summaryPath = `${sectionKey}.${view.summary_field}`;
   return (
     <div>
       <p>
-        {lensSummary(section, view)} <ConfidenceBadge confidence={section.confidence} />
+        <EditableText path={summaryPath} original={lensSummary(section, view)} edits={edits} onEdit={onEdit} />{" "}
+        <ConfidenceBadge confidence={section.confidence} />
       </p>
       {view.detail === "full" && section.analysis && (
         <details open={false}>
@@ -156,7 +167,9 @@ function SectionBody({
       {view.detail !== "brief" && section.key_points.length > 0 && (
         <ul>
           {section.key_points.map((k, i) => (
-            <li key={i}>{k}</li>
+            <li key={i}>
+              <EditableText path={`${sectionKey}.key_points.${i}`} original={k} edits={edits} onEdit={onEdit} />
+            </li>
           ))}
         </ul>
       )}
@@ -310,12 +323,16 @@ export default function DossierView({
   view,
   overrides,
   onOverride,
+  edits = {},
+  onEdit = () => {},
 }: {
   dossier: Dossier;
   lens: LensConfig;
   view: LensView;
   overrides: Overrides;
   onOverride: (id: string, value: string | null) => void;
+  edits?: DossierEdits;
+  onEdit?: OnEdit;
 }) {
   const lensed = applyLens(dossier, lens);
 
@@ -360,13 +377,27 @@ export default function DossierView({
         <summary>
           <strong>{title}</strong>
         </summary>
-        <SectionBody section={section} view={view} overrides={overrides} onOverride={onOverride} />
+        <SectionBody
+          sectionKey={key}
+          section={section}
+          view={view}
+          overrides={overrides}
+          onOverride={onOverride}
+          edits={edits}
+          onEdit={onEdit}
+        />
         {/* Section-spanning conclusions live in dossier.conclusions (kept out of
             the sections in the schema for grammar-size reasons) but render in
             their home sections here. */}
         {key === "ownership_control" && (
           <p>
-            <strong>Owner motivation read:</strong> {dossier.conclusions.owner_motivation_read}
+            <strong>Owner motivation read:</strong>{" "}
+            <EditableText
+              path="conclusions.owner_motivation_read"
+              original={dossier.conclusions.owner_motivation_read}
+              edits={edits}
+              onEdit={onEdit}
+            />
           </p>
         )}
         {key === "capital_structure_health" && (
@@ -377,15 +408,33 @@ export default function DossierView({
         {key === "investment_angle" && (
           <div>
             <p>
-              <strong>Investment thesis:</strong> {dossier.conclusions.investment_thesis}
+              <strong>Investment thesis:</strong>{" "}
+              <EditableText
+                path="conclusions.investment_thesis"
+                original={dossier.conclusions.investment_thesis}
+                edits={edits}
+                onEdit={onEdit}
+              />
             </p>
             {view.detail !== "brief" && (
               <>
                 <p>
-                  <strong>Moat:</strong> {dossier.conclusions.moat_assessment}
+                  <strong>Moat:</strong>{" "}
+                  <EditableText
+                    path="conclusions.moat_assessment"
+                    original={dossier.conclusions.moat_assessment}
+                    edits={edits}
+                    onEdit={onEdit}
+                  />
                 </p>
                 <p>
-                  <strong>Exit thesis:</strong> {dossier.conclusions.exit_thesis}
+                  <strong>Exit thesis:</strong>{" "}
+                  <EditableText
+                    path="conclusions.exit_thesis"
+                    original={dossier.conclusions.exit_thesis}
+                    edits={edits}
+                    onEdit={onEdit}
+                  />
                 </p>
               </>
             )}
@@ -395,12 +444,33 @@ export default function DossierView({
             <ol>
               {dossier.conclusions.deal_killers.map((k, i) => (
                 <li key={i}>
-                  <strong>{k.title}</strong> <small>[{k.severity.replace(/_/g, " ")}]</small> — {k.rationale}
+                  <strong>
+                    <EditableText
+                      path={`conclusions.deal_killers.${i}.title`}
+                      original={k.title}
+                      edits={edits}
+                      onEdit={onEdit}
+                      multiline={false}
+                    />
+                  </strong>{" "}
+                  <small>[{k.severity.replace(/_/g, " ")}]</small> —{" "}
+                  <EditableText
+                    path={`conclusions.deal_killers.${i}.rationale`}
+                    original={k.rationale}
+                    edits={edits}
+                    onEdit={onEdit}
+                  />
                 </li>
               ))}
             </ol>
             <p>
-              <strong>Verdict:</strong> {dossier.conclusions.verdict}
+              <strong>Verdict:</strong>{" "}
+              <EditableText
+                path="conclusions.verdict"
+                original={dossier.conclusions.verdict}
+                edits={edits}
+                onEdit={onEdit}
+              />
             </p>
           </div>
         )}

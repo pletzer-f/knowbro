@@ -7,7 +7,7 @@ export async function GET() {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("dossiers")
-    .select("id, company_name, config_fingerprint, created_at, updated_at")
+    .select("id, company_id, company_name, config_fingerprint, created_at, updated_at")
     .order("created_at", { ascending: false });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ dossiers: data });
@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
   let body: {
     result?: AnalysisResult;
     overrides?: Record<string, string>;
+    edits?: Record<string, { value: string; edited_at: string }>;
     chat?: { role: "user" | "assistant"; content: string }[];
   };
   try {
@@ -32,10 +33,35 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Find or create the company this dossier belongs to.
+  const companyName = r.input.companyName.trim();
+  let companyId: string;
+  const { data: existingCompany } = await supabase
+    .from("companies")
+    .select("id")
+    .eq("name", companyName)
+    .maybeSingle();
+  if (existingCompany) {
+    companyId = existingCompany.id;
+  } else {
+    const { data: newCompany, error: companyError } = await supabase
+      .from("companies")
+      .insert({ user_id: user!.id, name: companyName })
+      .select("id")
+      .single();
+    if (companyError) return NextResponse.json({ error: companyError.message }, { status: 500 });
+    companyId = newCompany.id;
+  }
+
   const { data, error } = await supabase
     .from("dossiers")
     .insert({
-      company_name: r.input.companyName,
+      company_id: companyId,
+      company_name: companyName,
       input: r.input,
       draft: r.draft,
       critique: r.critique,
@@ -43,6 +69,7 @@ export async function POST(req: NextRequest) {
       steps: r.steps,
       config_fingerprint: r.configFingerprint,
       overrides: body.overrides ?? {},
+      edits: body.edits ?? {},
     })
     .select("id")
     .single();

@@ -4,8 +4,10 @@
 // persist to the database row and the private note is editable alongside.
 
 import { use, useEffect, useState } from "react";
+import Link from "next/link";
 import type { Critique, Dossier, LensConfig, AnalysisInput, TraceStep } from "@/engine/src/types";
 import { resolveView } from "@/engine/src/lens";
+import { withEdit, type DossierEdits } from "@/lib/edits";
 import DossierView, { CritiquePanel, type Overrides } from "@/components/DossierView";
 import ChatPanel from "@/components/ChatPanel";
 
@@ -17,6 +19,7 @@ const LENSES = [investorLens, entrepreneurLens, curiousLens] as LensConfig[];
 
 interface SavedDossier {
   id: string;
+  company_id: string;
   company_name: string;
   input: AnalysisInput;
   draft: Dossier;
@@ -25,6 +28,7 @@ interface SavedDossier {
   steps: TraceStep[];
   config_fingerprint: string;
   overrides: Overrides;
+  edits: DossierEdits;
   created_at: string;
 }
 
@@ -35,6 +39,7 @@ export default function SavedDossierPage({ params }: { params: Promise<{ id: str
   const [lensId, setLensId] = useState("investor");
   const [viewId, setViewId] = useState<string | undefined>(undefined);
   const [overrides, setOverrides] = useState<Overrides>({});
+  const [edits, setEdits] = useState<DossierEdits>({});
   const [note, setNote] = useState("");
   const [noteState, setNoteState] = useState<"idle" | "saving" | "saved">("idle");
 
@@ -48,6 +53,7 @@ export default function SavedDossierPage({ params }: { params: Promise<{ id: str
       }
       setRow(json);
       setOverrides(json.overrides ?? {});
+      setEdits(json.edits ?? {});
       const noteRes = await fetch(`/api/notes?company=${encodeURIComponent(json.company_name)}`);
       if (noteRes.ok) setNote((await noteRes.json()).content);
     })();
@@ -62,6 +68,16 @@ export default function SavedDossierPage({ params }: { params: Promise<{ id: str
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ overrides: next }),
+    });
+  };
+
+  const handleEdit = async (path: string, value: string | null) => {
+    const next = withEdit(edits, path, value);
+    setEdits(next);
+    await fetch(`/api/dossiers/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ edits: next }),
     });
   };
 
@@ -95,6 +111,9 @@ export default function SavedDossierPage({ params }: { params: Promise<{ id: str
 
   return (
     <main>
+      <p>
+        <Link href={`/companies/${row.company_id}`}>← {row.company_name} (company page &amp; financial model)</Link>
+      </p>
       <p>
         <small>
           Saved {new Date(row.created_at).toLocaleString()} · engine config {row.config_fingerprint} ·{" "}
@@ -130,7 +149,15 @@ export default function SavedDossierPage({ params }: { params: Promise<{ id: str
       </p>
       <CritiquePanel critique={row.critique} />
       <hr />
-      <DossierView dossier={row.dossier} lens={lens} view={view} overrides={overrides} onOverride={handleOverride} />
+      <DossierView
+        dossier={row.dossier}
+        lens={lens}
+        view={view}
+        overrides={overrides}
+        onOverride={handleOverride}
+        edits={edits}
+        onEdit={handleEdit}
+      />
       <hr />
       <ChatPanel dossierId={row.id} companyName={row.company_name} />
       <hr />
