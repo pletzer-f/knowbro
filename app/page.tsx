@@ -31,6 +31,11 @@ export default function Home() {
   const [lastLoadedNote, setLastLoadedNote] = useState("");
   const [chatTranscript, setChatTranscript] = useState<ChatMsg[]>([]);
   const [edits, setEdits] = useState<DossierEdits>({});
+  const [country, setCountry] = useState("");
+  const [ukNumber, setUkNumber] = useState("");
+  const [extraUrls, setExtraUrls] = useState("");
+  const [withPeerComps, setWithPeerComps] = useState(true);
+  const [gathering, setGathering] = useState(false);
 
   // "Run a new analysis" links from a company page prefill the name.
   useEffect(() => {
@@ -68,6 +73,49 @@ export default function Home() {
     if (content && (userNotes.trim() === "" || userNotes === lastLoadedNote)) {
       setUserNotes(content);
       setLastLoadedNote(content);
+    }
+  };
+
+  // Auto-gather: streams the assembled public-data pack into the paste box,
+  // where the user reviews/edits it before running the engine.
+  const fetchPublicData = async () => {
+    const company = companyName.trim();
+    if (!company || gathering) return;
+    setGathering(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/gather", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          companyName: company,
+          country: country.trim() || undefined,
+          companyNumber: ukNumber.trim() || undefined,
+          urls: extraUrls
+            .split("\n")
+            .map((u) => u.trim())
+            .filter(Boolean),
+          includePeerComps: withPeerComps,
+        }),
+      });
+      if (!res.ok || !res.body) {
+        const json = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+        throw new Error(json.error || `HTTP ${res.status}`);
+      }
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let collected = rawData.trim() ? rawData + "\n\n" : "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        collected += decoder.decode(value, { stream: true });
+        const snapshot = collected;
+        setRawData(snapshot);
+      }
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setGathering(false);
     }
   };
 
@@ -133,6 +181,44 @@ export default function Home() {
             <input value={companyName} onChange={(e) => setCompanyName(e.target.value)} onBlur={loadNote} size={60} required />
           </label>
         </p>
+        <fieldset>
+          <legend>Fetch public data automatically (optional)</legend>
+          <p>
+            <label>
+              Country{" "}
+              <input
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                size={16}
+                placeholder="e.g. Austria, UK"
+              />
+            </label>{" "}
+            <label>
+              UK company number (if known){" "}
+              <input value={ukNumber} onChange={(e) => setUkNumber(e.target.value)} size={12} />
+            </label>{" "}
+            <label>
+              <input type="checkbox" checked={withPeerComps} onChange={(e) => setWithPeerComps(e.target.checked)} />{" "}
+              also collect listed-peer multiples
+            </label>
+          </p>
+          <p>
+            <label>
+              Specific pages to include (optional, one URL per line)
+              <br />
+              <textarea value={extraUrls} onChange={(e) => setExtraUrls(e.target.value)} rows={2} cols={100} />
+            </label>
+          </p>
+          <p>
+            <button type="button" onClick={fetchPublicData} disabled={gathering || !companyName.trim()}>
+              {gathering ? "Gathering (1-3 minutes, streams in below)..." : "Fetch public data"}
+            </button>{" "}
+            <small>
+              Searches public sources only and writes into the box below — review before analysing. Honours your
+              source preferences.
+            </small>
+          </p>
+        </fieldset>
         <p>
           <label>
             Pasted data

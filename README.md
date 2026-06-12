@@ -10,7 +10,9 @@ Phase 2: Supabase invite-only auth (email+password, owner provisions accounts �
 
 Phase 3: company-scoped chatbot on fresh results and saved dossiers — full dossier + source data + red-team critique in context, held to engine standards (confidence-tagged, inference shown, legitimacy boundary). Conversations persist per saved dossier; pre-save chat is carried over on save. Prompt lives in `engine/config/prompts/chat.md`; model/effort in `models.json` (`chat` pass).
 
-Not yet built (in order): live registry data (4), PDF export (5). See `docs/SPEC.md`.
+Phase 4 (live data): "Fetch public data" on the analyse page — a web-research gather pass (server-side search/fetch through the Anthropic API, no extra keys; works for any country; legitimacy boundary in `engine/config/prompts/gather.md`) plus the official UK Companies House connector (free API; set `COMPANIES_HOUSE_API_KEY`). Optionally collects listed-peer multiples for the model. Everything honours per-user source preferences and streams into the paste box for review before analysing. Plus: "My Companies" with one living financial model per company (Bear/Base/Bull, EV sensitivity, IRR/MoIC, debt paydown, peer comps, promptable metrics) and in-dossier editing with originals preserved.
+
+Not yet built: PDF export (5), then the post-v1 roadmap (living dossier deltas, calibration tracking, forced-seller radar). See `docs/SPEC.md`.
 
 Supabase project: `wba-company-intel` (`iwqbymyponrhluousixb`, eu-central-1). Provision users at Dashboard → Authentication → Users → Add user (auto-confirm on).
 

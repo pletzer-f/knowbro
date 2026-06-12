@@ -44,6 +44,12 @@ Prompts/chains/lenses/schema in version-controlled editable config (they ARE the
 4. Live data: UK Companies House (free API, AI extraction of scanned PDFs) → DACH (Bundesanzeiger, Firmenbuch via lawful wrappers) → S&P Global connector for listed-comparable benchmarks (supporting input, never the spine). Honour per-user source prefs + legitimacy boundary.
 5. PDF export: Long (full, all inference paths) / Short (snapshot + investment angle + gaps) / Visual (chart-led). Lens, sections, branding chosen at export time.
 
+## Post-v1 roadmap (agreed 2026-06-12)
+
+6. **Living dossier / delta engine** — scheduled or manual data re-pulls per watched company; deterministic diff of raw data (free) → cheap-model materiality triage (cents) → engine re-run of affected chains only on material change (~€1-2). Output: "what changed and what it means", confidence shifts, motivation-read changes. Cost design is the feature: watching is free, judgment is on-trigger.
+7. **Calibration tracking** — score every estimate against later-emerging truth (filings, user ground truth, deal prices); publish the engine's own hit rate per confidence level. Free (arithmetic over stored estimates). Long-term moat.
+8. **Forced-seller radar** — invert the engine: batch-screen registry segments for owner-motivation signals (founder age, holding restructurings, fund vintage). Funnel: deterministic registry filters (free) → small-model scoring (cents) → full engine only on user-promoted shortlist.
+
 ## Definition of done (v1)
 
 Login (invite-only) → paste data → choose lens → confidence-tagged structured dossier with inspectable inference paths and overridable estimates → chatbot follow-ups → save with private notes → source preferences → Long/Short/Visual PDF. Interface unstyled and functional. Engine demonstrably better than a smart non-banker's first pass.

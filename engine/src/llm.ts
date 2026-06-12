@@ -42,6 +42,8 @@ export interface TextStreamResult {
 export interface LlmProvider {
   completeStructured<T>(call: StructuredCall): Promise<StructuredResult<T>>;
   streamText(call: TextStreamCall): Promise<TextStreamResult>;
+  /** streamText with server-side web search + web fetch tools enabled. */
+  researchText(call: TextStreamCall): Promise<TextStreamResult>;
 }
 
 class AnthropicProvider implements LlmProvider {
@@ -115,6 +117,53 @@ class AnthropicProvider implements LlmProvider {
       model: message.model,
       durationMs: Date.now() - started,
     };
+  }
+
+  async researchText(call: TextStreamCall): Promise<TextStreamResult> {
+    const started = Date.now();
+    let usage: PassUsage = { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0 };
+    let model = call.pass.model;
+    let text = "";
+
+    // Server-side tools run a server-side loop; it may pause (stop_reason
+    // "pause_turn") and must be resumed by re-sending the conversation.
+    const messages: Anthropic.MessageParam[] = call.messages.map((m) => ({ role: m.role, content: m.content }));
+    for (let round = 0; round < 8; round++) {
+      const stream = this.client.messages.stream({
+        model: call.pass.model,
+        max_tokens: call.pass.maxTokens,
+        thinking: { type: "adaptive" },
+        output_config: { effort: call.pass.effort },
+        system: [{ type: "text", text: call.system, cache_control: { type: "ephemeral" } }],
+        messages,
+        tools: [
+          { type: "web_search_20260209", name: "web_search", max_uses: 12 },
+          { type: "web_fetch_20260209", name: "web_fetch", max_uses: 15 },
+        ],
+      });
+
+      stream.on("text", (delta) => {
+        text += delta;
+        call.onDelta(delta);
+      });
+
+      const message = await stream.finalMessage();
+      usage = {
+        inputTokens: usage.inputTokens + message.usage.input_tokens,
+        outputTokens: usage.outputTokens + message.usage.output_tokens,
+        cacheReadTokens: usage.cacheReadTokens + (message.usage.cache_read_input_tokens ?? 0),
+        cacheWriteTokens: usage.cacheWriteTokens + (message.usage.cache_creation_input_tokens ?? 0),
+      };
+      model = message.model;
+
+      if (message.stop_reason === "pause_turn") {
+        messages.push({ role: "assistant", content: message.content });
+        continue;
+      }
+      break;
+    }
+
+    return { text, usage, model, durationMs: Date.now() - started };
   }
 
   async streamText(call: TextStreamCall): Promise<TextStreamResult> {
