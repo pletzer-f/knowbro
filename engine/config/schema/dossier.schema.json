@@ -86,6 +86,7 @@
         "owner_motivation_read": { "type": "string", "description": "Decisive conclusion: what the owner probably wants, timeframe, deal implication" },
         "health_verdict": { "type": "string", "enum": ["healthy", "stretched", "distress_signals_present", "insufficient_data"] },
         "moat_assessment": { "type": "string" },
+        "investment_thesis": { "type": "string", "description": "The affirmative case: why own this company, the value-creation path, what you would pay attention to. 3-6 sentences, committed." },
         "exit_thesis": { "type": "string", "description": "Acquirer map + ranked exit routes + multiple context" },
         "deal_killers": {
           "type": "array",
@@ -103,7 +104,7 @@
         },
         "verdict": { "type": "string", "description": "The decisive bottom line, 2-4 sentences" }
       },
-      "required": ["owner_motivation_read", "health_verdict", "moat_assessment", "exit_thesis", "deal_killers", "verdict"],
+      "required": ["owner_motivation_read", "health_verdict", "moat_assessment", "investment_thesis", "exit_thesis", "deal_killers", "verdict"],
       "additionalProperties": false
     },
     "what_we_dont_know": {

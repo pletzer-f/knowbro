@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from "react";
 import type { AnalysisResult, LensConfig } from "@/engine/src/types";
+import { resolveView } from "@/engine/src/lens";
 import DossierView, { CritiquePanel, type Overrides } from "@/components/DossierView";
 
 import investorLens from "@/engine/config/lenses/investor.json";
@@ -18,6 +19,7 @@ export default function Home() {
   const [rawData, setRawData] = useState("");
   const [userNotes, setUserNotes] = useState("");
   const [lensId, setLensId] = useState("investor");
+  const [viewId, setViewId] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AnalysisResult | null>(null);
@@ -74,6 +76,7 @@ export default function Home() {
   };
 
   const lens = LENSES.find((l) => l.id === lensId) ?? LENSES[0];
+  const view = resolveView(lens, viewId);
 
   return (
     <main>
@@ -110,7 +113,13 @@ export default function Home() {
         <p>
           <label>
             Lens{" "}
-            <select value={lensId} onChange={(e) => setLensId(e.target.value)}>
+            <select
+              value={lensId}
+              onChange={(e) => {
+                setLensId(e.target.value);
+                setViewId(undefined); // back to the lens's default view
+              }}
+            >
               {LENSES.map((l) => (
                 <option key={l.id} value={l.id}>
                   {l.label} — {l.audience_description}
@@ -119,6 +128,22 @@ export default function Home() {
             </select>
           </label>
         </p>
+        {lens.views.length > 1 && (
+          <p>
+            View:{" "}
+            {lens.views.map((v) => (
+              <label key={v.id} title={v.tagline}>
+                <input
+                  type="radio"
+                  name="view"
+                  checked={view.id === v.id}
+                  onChange={() => setViewId(v.id)}
+                />
+                {v.label} <small>({v.tagline})</small>{" "}
+              </label>
+            ))}
+          </p>
+        )}
         <p>
           <button type="submit" disabled={loading}>
             {loading ? "Analysing (3 passes: draft → red-team → revise; this takes a few minutes)..." : "Analyse"}
@@ -146,7 +171,7 @@ export default function Home() {
           </p>
           <CritiquePanel critique={result.critique} />
           <hr />
-          <DossierView dossier={result.final} lens={lens} overrides={overrides} onOverride={handleOverride} />
+          <DossierView dossier={result.final} lens={lens} view={view} overrides={overrides} onOverride={handleOverride} />
         </div>
       )}
     </main>

@@ -2,8 +2,6 @@
   "id": "curious",
   "label": "Curious",
   "audience_description": "An informed individual who wants to genuinely understand this company without the technical apparatus.",
-  "summary_field": "plain_language_summary",
-  "depth": "light",
   "section_order": ["snapshot", "business_model", "ownership_control", "financial_picture", "investment_angle", "capital_structure_health", "what_we_dont_know"],
   "sections_expanded": ["snapshot", "business_model"],
   "section_emphasis": {
@@ -14,7 +12,16 @@
     "capital_structure_health": "low",
     "what_we_dont_know": "normal"
   },
-  "show_method_detail": false,
-  "show_inference_paths_by_default": false,
-  "intro_note": "Plain-language view. Estimates still show their confidence; click a badge to see how a number was derived."
+  "intro_note": "Plain-language view. Estimates still show their confidence; click a badge to see how a number was derived.",
+  "views": [
+    {
+      "id": "plain",
+      "label": "Coffee Chat",
+      "tagline": "The whole story, no jargon.",
+      "summary_field": "plain_language_summary",
+      "detail": "standard",
+      "show_method_detail": false,
+      "show_inference_paths_by_default": false
+    }
+  ]
 }

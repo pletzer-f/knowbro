@@ -96,11 +96,21 @@ export function runChecks(result: AnalysisResult): CheckResult[] {
     `${dk.length} deal-killers`
   );
 
-  // 8. Decisive verdict + owner motivation read present and non-hedged-empty
+  // 8. Decisive verdict + investment thesis + owner motivation read present and non-hedged-empty
   add(
-    "decisive-verdict-and-owner-read",
-    d.conclusions.verdict.trim().length > 80 && d.conclusions.owner_motivation_read.trim().length > 80,
-    `verdict ${d.conclusions.verdict.length} chars, owner read ${d.conclusions.owner_motivation_read.length} chars`
+    "decisive-verdict-thesis-and-owner-read",
+    d.conclusions.verdict.trim().length > 80 &&
+      d.conclusions.investment_thesis.trim().length > 120 &&
+      d.conclusions.owner_motivation_read.trim().length > 80,
+    `verdict ${d.conclusions.verdict.length}, thesis ${d.conclusions.investment_thesis.length}, owner read ${d.conclusions.owner_motivation_read.length} chars`
+  );
+
+  // 8b. Range discipline: revenue estimate states a most-likely value, not just a band
+  const revEst = d.financial_picture.estimates.find((e) => e.id.toLowerCase().includes("revenue"));
+  add(
+    "revenue-estimate-has-most-likely-value",
+    !!revEst && /most likely|midpoint|~/i.test(revEst.value),
+    revEst ? `value: "${revEst.value}"` : "no revenue estimate"
   );
 
   // 9. Unknowns: 4-10 items, each with a concrete diligence question

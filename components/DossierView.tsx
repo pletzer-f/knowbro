@@ -2,13 +2,24 @@
 
 // Renders the structured engine output as live, interactive (unstyled) UI:
 // - collapsible sections, ordered/emphasised by the selected lens
+// - a view switcher per lens (e.g. investor: Espresso / Boardroom / Deep Dive)
+//   controlling depth, language and method detail
 // - clickable confidence badges revealing the inference path / rationale
 // - estimates editable by the user (overrides handled by the parent)
-// All presentation decisions come from the lens config — logic stays in
+// All presentation decisions come from lens/view config — logic stays in
 // engine/src/lens.ts so a later design pass only has to reskin this file.
 
 import { useState } from "react";
-import type { Confidence, Critique, Dossier, Estimate, LensConfig, SectionCore, SectionKey } from "@/engine/src/types";
+import type {
+  Confidence,
+  Critique,
+  Dossier,
+  Estimate,
+  LensConfig,
+  LensView,
+  SectionCore,
+  SectionKey,
+} from "@/engine/src/types";
 import { applyLens, lensSummary } from "@/engine/src/lens";
 
 export type Overrides = Record<string, string>; // estimateId -> overridden value
@@ -31,18 +42,16 @@ export function ConfidenceBadge({ confidence, label }: { confidence: Confidence;
 
 function EstimateView({
   estimate,
-  showMethodDetail,
-  showPathByDefault,
+  view,
   override,
   onOverride,
 }: {
   estimate: Estimate;
-  showMethodDetail: boolean;
-  showPathByDefault: boolean;
+  view: LensView;
   override?: string;
   onOverride: (id: string, value: string | null) => void;
 }) {
-  const [showPath, setShowPath] = useState(showPathByDefault);
+  const [showPath, setShowPath] = useState(view.show_inference_paths_by_default);
   const [editing, setEditing] = useState(false);
   const [draftValue, setDraftValue] = useState(override ?? estimate.value);
 
@@ -61,7 +70,7 @@ function EstimateView({
       )}{" "}
       <small>[{estimate.basis.replace("_", " ")}]</small> <ConfidenceBadge confidence={estimate.confidence} />{" "}
       <button type="button" onClick={() => setShowPath(!showPath)}>
-        {showPath ? "hide" : "show"} inference path
+        {showPath ? "hide" : "how was this derived?"}
       </button>{" "}
       {!editing ? (
         <button type="button" onClick={() => { setDraftValue(effectiveValue); setEditing(true); }}>
@@ -83,7 +92,7 @@ function EstimateView({
               <li key={i}>{step}</li>
             ))}
           </ol>
-          {showMethodDetail && estimate.methods.length > 0 && (
+          {view.show_method_detail && estimate.methods.length > 0 && (
             <details>
               <summary>Methods ({estimate.methods.length}) &amp; reconciliation</summary>
               <ul>
@@ -124,27 +133,27 @@ function EstimateView({
 
 function SectionBody({
   section,
-  lens,
+  view,
   overrides,
   onOverride,
 }: {
   section: SectionCore;
-  lens: LensConfig;
+  view: LensView;
   overrides: Overrides;
   onOverride: (id: string, value: string | null) => void;
 }) {
   return (
     <div>
       <p>
-        {lensSummary(section, lens)} <ConfidenceBadge confidence={section.confidence} />
+        {lensSummary(section, view)} <ConfidenceBadge confidence={section.confidence} />
       </p>
-      {lens.depth === "full" && section.analysis && (
+      {view.detail === "full" && section.analysis && (
         <details open={false}>
           <summary>Full analysis</summary>
           <p style={{ whiteSpace: "pre-wrap" }}>{section.analysis}</p>
         </details>
       )}
-      {section.key_points.length > 0 && (
+      {view.detail !== "brief" && section.key_points.length > 0 && (
         <ul>
           {section.key_points.map((k, i) => (
             <li key={i}>{k}</li>
@@ -159,8 +168,7 @@ function SectionBody({
               <EstimateView
                 key={e.id}
                 estimate={e}
-                showMethodDetail={lens.show_method_detail}
-                showPathByDefault={lens.show_inference_paths_by_default}
+                view={view}
                 override={overrides[e.id]}
                 onOverride={onOverride}
               />
@@ -168,7 +176,7 @@ function SectionBody({
           </ul>
         </div>
       )}
-      {lens.depth === "full" && section.sources_and_notes.length > 0 && (
+      {view.detail === "full" && section.sources_and_notes.length > 0 && (
         <details>
           <summary>Sources &amp; notes</summary>
           <ul>
@@ -181,6 +189,80 @@ function SectionBody({
         </details>
       )}
     </div>
+  );
+}
+
+function UnknownsSection({
+  dossier,
+  view,
+  expanded,
+  title,
+}: {
+  dossier: Dossier;
+  view: LensView;
+  expanded: boolean;
+  title: string;
+}) {
+  const s = dossier.what_we_dont_know;
+  const [copied, setCopied] = useState(false);
+
+  const copyQuestions = async () => {
+    const text = s.items.map((u, i) => `${i + 1}. ${u.diligence_question}`).join("\n");
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <details open={expanded}>
+      <summary>
+        <strong>{title}</strong> <small>({s.items.length} gaps → your diligence question list)</small>
+      </summary>
+      <p>{view.summary_field === "plain_language_summary" ? s.plain_language_summary || s.summary : s.summary}</p>
+      <p>
+        <button type="button" onClick={copyQuestions}>
+          {copied ? "Copied!" : "Copy all questions (to ask the company)"}
+        </button>
+      </p>
+      {view.detail === "brief" ? (
+        <ol>
+          {s.items.map((u, i) => (
+            <li key={i}>
+              <em>{u.diligence_question}</em>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <table border={1} cellPadding={6}>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>What we don't know</th>
+              <th>Why it matters</th>
+              <th>Ask this</th>
+              <th>How to close the gap</th>
+            </tr>
+          </thead>
+          <tbody>
+            {s.items.map((u, i) => (
+              <tr key={i}>
+                <td>{i + 1}</td>
+                <td>
+                  <strong>{u.gap}</strong>
+                </td>
+                <td>{u.why_it_matters}</td>
+                <td>
+                  <em>{u.diligence_question}</em>
+                </td>
+                <td>
+                  <small>{u.how_to_resolve}</small>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </details>
   );
 }
 
@@ -225,11 +307,13 @@ export function CritiquePanel({ critique }: { critique: Critique }) {
 export default function DossierView({
   dossier,
   lens,
+  view,
   overrides,
   onOverride,
 }: {
   dossier: Dossier;
   lens: LensConfig;
+  view: LensView;
   overrides: Overrides;
   onOverride: (id: string, value: string | null) => void;
 }) {
@@ -267,28 +351,7 @@ export default function DossierView({
     }
 
     if (key === "what_we_dont_know") {
-      const s = dossier.what_we_dont_know;
-      return (
-        <details open={expanded} key={key}>
-          <summary>
-            <strong>{title}</strong>
-          </summary>
-          <p>{lens.summary_field === "plain_language_summary" ? s.plain_language_summary || s.summary : s.summary}</p>
-          <ol>
-            {s.items.map((u, i) => (
-              <li key={i}>
-                <strong>{u.gap}</strong>
-                <br />
-                Why it matters: {u.why_it_matters}
-                <br />
-                Ask: <em>{u.diligence_question}</em>
-                <br />
-                <small>How to resolve: {u.how_to_resolve}</small>
-              </li>
-            ))}
-          </ol>
-        </details>
-      );
+      return <UnknownsSection key={key} dossier={dossier} view={view} expanded={expanded} title={title} />;
     }
 
     const section = dossier[key];
@@ -297,7 +360,7 @@ export default function DossierView({
         <summary>
           <strong>{title}</strong>
         </summary>
-        <SectionBody section={section} lens={lens} overrides={overrides} onOverride={onOverride} />
+        <SectionBody section={section} view={view} overrides={overrides} onOverride={onOverride} />
         {/* Section-spanning conclusions live in dossier.conclusions (kept out of
             the sections in the schema for grammar-size reasons) but render in
             their home sections here. */}
@@ -314,11 +377,18 @@ export default function DossierView({
         {key === "investment_angle" && (
           <div>
             <p>
-              <strong>Moat:</strong> {dossier.conclusions.moat_assessment}
+              <strong>Investment thesis:</strong> {dossier.conclusions.investment_thesis}
             </p>
-            <p>
-              <strong>Exit thesis:</strong> {dossier.conclusions.exit_thesis}
-            </p>
+            {view.detail !== "brief" && (
+              <>
+                <p>
+                  <strong>Moat:</strong> {dossier.conclusions.moat_assessment}
+                </p>
+                <p>
+                  <strong>Exit thesis:</strong> {dossier.conclusions.exit_thesis}
+                </p>
+              </>
+            )}
             <p>
               <strong>Deal-killers:</strong>
             </p>
@@ -343,7 +413,7 @@ export default function DossierView({
       <h2>{dossier.company_name}</h2>
       <p>
         <small>
-          {dossier.data_period_note} — lens: {lens.label} ({lens.intro_note})
+          {dossier.data_period_note} — lens: {lens.label} / {view.label} ({view.tagline})
         </small>
       </p>
       {lensed.sections.map((s) => renderSection(s.key, s.expandedByDefault, s.title))}

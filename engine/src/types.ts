@@ -70,6 +70,8 @@ export interface Conclusions {
   owner_motivation_read: string;
   health_verdict: "healthy" | "stretched" | "distress_signals_present" | "insufficient_data";
   moat_assessment: string;
+  /** The affirmative case: why own this company, the value-creation path. */
+  investment_thesis: string;
   exit_thesis: string;
   deal_killers: DealKiller[];
   verdict: string;
@@ -138,18 +140,32 @@ export interface Critique {
   overall_assessment: string;
 }
 
+/** A view is a depth/voice level within a lens (e.g. investor: Espresso /
+ *  Boardroom / Deep Dive). Same dossier, same lens ordering — different
+ *  detail and language. */
+export interface LensView {
+  id: string;
+  /** The display name — deliberately fun, e.g. "Espresso". */
+  label: string;
+  tagline: string;
+  summary_field: "summary" | "plain_language_summary";
+  /** brief = summaries + headline estimates; standard = + key points;
+   *  full = + full analysis text, sources, method detail. */
+  detail: "brief" | "standard" | "full";
+  show_method_detail: boolean;
+  show_inference_paths_by_default: boolean;
+}
+
 export interface LensConfig {
   id: string;
   label: string;
   audience_description: string;
-  summary_field: "summary" | "plain_language_summary";
-  depth: "full" | "light";
   section_order: SectionKey[];
   sections_expanded: SectionKey[];
   section_emphasis: Partial<Record<SectionKey, "high" | "normal" | "low">>;
-  show_method_detail: boolean;
-  show_inference_paths_by_default: boolean;
   intro_note: string;
+  /** At least one; the first is the default. */
+  views: LensView[];
 }
 
 export interface AnalysisInput {

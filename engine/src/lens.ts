@@ -2,7 +2,7 @@
 // no second pipeline: the same Dossier, reshaped (order, depth, emphasis,
 // which summary field is foregrounded).
 
-import type { Dossier, LensConfig, SectionKey } from "./types";
+import type { Dossier, LensConfig, LensView, SectionKey } from "./types";
 
 export interface LensedSection {
   key: SectionKey;
@@ -37,12 +37,17 @@ export function applyLens(dossier: Dossier, lens: LensConfig): LensedDossier {
   return { lens, dossier, sections };
 }
 
-/** Pick the lens-appropriate summary for a section object. */
+/** Resolve a view id within a lens; falls back to the lens's first (default) view. */
+export function resolveView(lens: LensConfig, viewId?: string): LensView {
+  return lens.views.find((v) => v.id === viewId) ?? lens.views[0];
+}
+
+/** Pick the view-appropriate summary for a section object. */
 export function lensSummary(
   section: { summary: string; plain_language_summary: string },
-  lens: LensConfig
+  view: LensView
 ): string {
-  return lens.summary_field === "plain_language_summary"
+  return view.summary_field === "plain_language_summary"
     ? section.plain_language_summary || section.summary
     : section.summary;
 }
