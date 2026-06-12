@@ -29,7 +29,7 @@ All judgment lives in editable, version-controlled config under `engine/config/`
 | `prompts/critique.md` | The red-team reviewer pass |
 | `prompts/revise.md` | The revision pass |
 | `prompts/output-instructions.md` | Field-level output discipline |
-| `schema/dossier.schema.json` | The 7-section structured output (API-enforced). Mirror changes in `engine/src/types.ts` |
+| `schema/dossier.schema.json` | The 7-section structured output (API-enforced). Mirror changes in `engine/src/types.ts`. **Sits near the API's grammar-size limit** — see the `$comment` at the top of the file before restructuring; test edits with a cheap `max_tokens: 16` request |
 | `lenses/*.json` | Investor / Entrepreneur / Curious presentation transforms |
 | `models.json` | Model, max tokens, effort per pass — the model-agnostic knob |
 

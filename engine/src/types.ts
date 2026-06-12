@@ -10,19 +10,15 @@ export interface Confidence {
   rationale: string;
 }
 
-export interface EstimateMethod {
-  name: string;
-  inputs_used: string[];
-  logic: string;
-  result: string;
-}
-
 export interface Estimate {
   id: string;
   label: string;
   value: string;
   basis: Basis;
-  methods: EstimateMethod[];
+  /** One string per method run: "Method: <name> | Inputs: ... | Logic: ... | Result: ...".
+   *  Kept as flat strings — nested method objects push the structured-output
+   *  schema over the API's grammar-size limit (see dossier.schema.json $comment). */
+  methods: string[];
   reconciliation: string;
   inference_path: string[];
   cross_checks: string[];
@@ -67,22 +63,28 @@ export interface UnknownItem {
   how_to_resolve: string;
 }
 
+/** Section-spanning decisive conclusions. Lives at the top level of the schema
+ *  (instead of inside the sections) to keep the structured-output grammar small;
+ *  the UI renders each field inside its home section. */
+export interface Conclusions {
+  owner_motivation_read: string;
+  health_verdict: "healthy" | "stretched" | "distress_signals_present" | "insufficient_data";
+  moat_assessment: string;
+  exit_thesis: string;
+  deal_killers: DealKiller[];
+  verdict: string;
+}
+
 export interface Dossier {
   company_name: string;
   data_period_note: string;
   snapshot: Snapshot;
   business_model: SectionCore;
-  ownership_control: SectionCore & { owner_motivation_read: string };
+  ownership_control: SectionCore;
   financial_picture: SectionCore;
-  capital_structure_health: SectionCore & {
-    health_verdict: "healthy" | "stretched" | "distress_signals_present" | "insufficient_data";
-  };
-  investment_angle: SectionCore & {
-    moat_assessment: string;
-    exit_thesis: string;
-    deal_killers: DealKiller[];
-    verdict: string;
-  };
+  capital_structure_health: SectionCore;
+  investment_angle: SectionCore;
+  conclusions: Conclusions;
   what_we_dont_know: {
     summary: string;
     plain_language_summary: string;
@@ -111,7 +113,7 @@ export const SECTION_KEYS: SectionKey[] = [
 
 export interface CritiqueFinding {
   id: string;
-  target_section: SectionKey | "cross_section";
+  target_section: SectionKey | "conclusions" | "cross_section";
   target_estimate_id: string;
   issue_type:
     | "weak_inference"

@@ -89,7 +89,7 @@ export function runChecks(result: AnalysisResult): CheckResult[] {
   add("at-least-one-multi-method-reconciliation", multiMethod.length >= 1, `${multiMethod.length} found`);
 
   // 7. Deal-killers: exactly 2 or 3, each with rationale
-  const dk = d.investment_angle.deal_killers;
+  const dk = d.conclusions.deal_killers;
   add(
     "deal-killers-2-or-3-with-rationale",
     dk.length >= 2 && dk.length <= 3 && dk.every((k) => k.rationale.trim().length > 20),
@@ -99,8 +99,8 @@ export function runChecks(result: AnalysisResult): CheckResult[] {
   // 8. Decisive verdict + owner motivation read present and non-hedged-empty
   add(
     "decisive-verdict-and-owner-read",
-    d.investment_angle.verdict.trim().length > 80 && d.ownership_control.owner_motivation_read.trim().length > 80,
-    `verdict ${d.investment_angle.verdict.length} chars, owner read ${d.ownership_control.owner_motivation_read.length} chars`
+    d.conclusions.verdict.trim().length > 80 && d.conclusions.owner_motivation_read.trim().length > 80,
+    `verdict ${d.conclusions.verdict.length} chars, owner read ${d.conclusions.owner_motivation_read.length} chars`
   );
 
   // 9. Unknowns: 4-10 items, each with a concrete diligence question

@@ -9,7 +9,7 @@
           "id": { "type": "string", "description": "f1, f2, ..." },
           "target_section": {
             "type": "string",
-            "enum": ["snapshot", "business_model", "ownership_control", "financial_picture", "capital_structure_health", "investment_angle", "what_we_dont_know", "cross_section"]
+            "enum": ["snapshot", "business_model", "ownership_control", "financial_picture", "capital_structure_health", "investment_angle", "conclusions", "what_we_dont_know", "cross_section"]
           },
           "target_estimate_id": { "type": "string", "description": "Estimate id the finding attacks; '' if section-level" },
           "issue_type": {

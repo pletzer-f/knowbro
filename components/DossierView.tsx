@@ -89,11 +89,12 @@ function EstimateView({
               <ul>
                 {estimate.methods.map((m, i) => (
                   <li key={i}>
-                    <strong>{m.name}</strong> → {m.result}
-                    <br />
-                    <small>inputs: {m.inputs_used.join("; ")}</small>
-                    <br />
-                    <small>{m.logic}</small>
+                    {/* "Method: x | Inputs: ... | Logic: ... | Result: ..." — split for readability */}
+                    {m.split(" | ").map((part, j) => (
+                      <div key={j}>
+                        <small>{part}</small>
+                      </div>
+                    ))}
                   </li>
                 ))}
               </ul>
@@ -297,36 +298,39 @@ export default function DossierView({
           <strong>{title}</strong>
         </summary>
         <SectionBody section={section} lens={lens} overrides={overrides} onOverride={onOverride} />
+        {/* Section-spanning conclusions live in dossier.conclusions (kept out of
+            the sections in the schema for grammar-size reasons) but render in
+            their home sections here. */}
         {key === "ownership_control" && (
           <p>
-            <strong>Owner motivation read:</strong> {dossier.ownership_control.owner_motivation_read}
+            <strong>Owner motivation read:</strong> {dossier.conclusions.owner_motivation_read}
           </p>
         )}
         {key === "capital_structure_health" && (
           <p>
-            <strong>Health verdict:</strong> {dossier.capital_structure_health.health_verdict.replace(/_/g, " ")}
+            <strong>Health verdict:</strong> {dossier.conclusions.health_verdict.replace(/_/g, " ")}
           </p>
         )}
         {key === "investment_angle" && (
           <div>
             <p>
-              <strong>Moat:</strong> {dossier.investment_angle.moat_assessment}
+              <strong>Moat:</strong> {dossier.conclusions.moat_assessment}
             </p>
             <p>
-              <strong>Exit thesis:</strong> {dossier.investment_angle.exit_thesis}
+              <strong>Exit thesis:</strong> {dossier.conclusions.exit_thesis}
             </p>
             <p>
               <strong>Deal-killers:</strong>
             </p>
             <ol>
-              {dossier.investment_angle.deal_killers.map((k, i) => (
+              {dossier.conclusions.deal_killers.map((k, i) => (
                 <li key={i}>
                   <strong>{k.title}</strong> <small>[{k.severity.replace(/_/g, " ")}]</small> — {k.rationale}
                 </li>
               ))}
             </ol>
             <p>
-              <strong>Verdict:</strong> {dossier.investment_angle.verdict}
+              <strong>Verdict:</strong> {dossier.conclusions.verdict}
             </p>
           </div>
         )}

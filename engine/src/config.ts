@@ -18,6 +18,20 @@ function stripComments(md: string): string {
   return md.replace(/<!--[\s\S]*?-->/g, "").trim();
 }
 
+/** Remove $comment keys (documentation in the schema files) — the API rejects them. */
+function stripSchemaComments<T>(node: T): T {
+  if (Array.isArray(node)) return node.map(stripSchemaComments) as T;
+  if (node && typeof node === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(node)) {
+      if (k === "$comment") continue;
+      out[k] = stripSchemaComments(v);
+    }
+    return out as T;
+  }
+  return node;
+}
+
 export interface PassModelConfig {
   model: string;
   maxTokens: number;
@@ -56,8 +70,8 @@ export function loadEngineConfig(): EngineConfig {
   const critiquePrompt = read("prompts/critique.md");
   const revisePrompt = read("prompts/revise.md");
 
-  const dossierSchema = JSON.parse(read("schema/dossier.schema.json"));
-  const critiqueSchema = JSON.parse(read("schema/critique.schema.json"));
+  const dossierSchema = stripSchemaComments(JSON.parse(read("schema/dossier.schema.json")));
+  const critiqueSchema = stripSchemaComments(JSON.parse(read("schema/critique.schema.json")));
   const models: ModelsConfig = JSON.parse(read("models.json"));
 
   const lensesDir = path.join(CONFIG_DIR, "lenses");

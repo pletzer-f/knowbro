@@ -48,7 +48,19 @@ class AnthropicProvider implements LlmProvider {
       messages: [{ role: "user", content: call.user }],
     });
 
-    const message = await stream.finalMessage();
+    let message;
+    try {
+      message = await stream.finalMessage();
+    } catch (e) {
+      if (e instanceof Anthropic.BadRequestError && e.message.includes("grammar is too large")) {
+        throw new Error(
+          "The output schema exceeds the API's structured-output grammar limit. " +
+            "A schema edit (likely in engine/config/schema/) re-introduced too much structural complexity — " +
+            "see the $comment at the top of dossier.schema.json for the constraints and how to test cheaply."
+        );
+      }
+      throw e;
+    }
 
     if (message.stop_reason === "max_tokens") {
       throw new Error(

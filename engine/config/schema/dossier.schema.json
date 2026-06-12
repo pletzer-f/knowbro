@@ -1,4 +1,5 @@
 {
+  "$comment": "CONSTRAINT: the Anthropic structured-outputs grammar compiler has a hard size limit and this schema sits near it. The five analytical sections MUST stay as $refs to the single section_core def, and estimate.methods MUST stay an array of strings — inlining section bodies or re-introducing nested method objects makes the API reject every request with 'compiled grammar is too large'. Test schema edits with a cheap max_tokens=16 request before relying on them.",
   "$defs": {
     "confidence": {
       "type": "object",
@@ -9,17 +10,6 @@
       "required": ["level", "rationale"],
       "additionalProperties": false
     },
-    "method": {
-      "type": "object",
-      "properties": {
-        "name": { "type": "string" },
-        "inputs_used": { "type": "array", "items": { "type": "string" } },
-        "logic": { "type": "string" },
-        "result": { "type": "string" }
-      },
-      "required": ["name", "inputs_used", "logic", "result"],
-      "additionalProperties": false
-    },
     "estimate": {
       "type": "object",
       "properties": {
@@ -27,7 +17,11 @@
         "label": { "type": "string" },
         "value": { "type": "string", "description": "Human-readable with units and period" },
         "basis": { "type": "string", "enum": ["filed_fact", "estimate", "inference", "user_provided"] },
-        "methods": { "type": "array", "items": { "$ref": "#/$defs/method" } },
+        "methods": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "One string per method run, formatted: 'Method: <name> | Inputs: <inputs used> | Logic: <reasoning> | Result: <result>'"
+        },
         "reconciliation": { "type": "string", "description": "How methods were combined; '' if single method" },
         "inference_path": { "type": "array", "items": { "type": "string" }, "description": "Step-by-step reasoning, one sentence per step" },
         "cross_checks": { "type": "array", "items": { "type": "string" } },
@@ -81,47 +75,16 @@
       "additionalProperties": false
     },
     "business_model": { "$ref": "#/$defs/section_core" },
-    "ownership_control": {
-      "type": "object",
-      "properties": {
-        "summary": { "type": "string" },
-        "plain_language_summary": { "type": "string" },
-        "analysis": { "type": "string" },
-        "key_points": { "type": "array", "items": { "type": "string" } },
-        "estimates": { "type": "array", "items": { "$ref": "#/$defs/estimate" } },
-        "confidence": { "$ref": "#/$defs/confidence" },
-        "sources_and_notes": { "type": "array", "items": { "type": "string" } },
-        "owner_motivation_read": { "type": "string", "description": "Decisive conclusion: what the owner probably wants, timeframe, deal implication" }
-      },
-      "required": ["summary", "plain_language_summary", "analysis", "key_points", "estimates", "confidence", "sources_and_notes", "owner_motivation_read"],
-      "additionalProperties": false
-    },
+    "ownership_control": { "$ref": "#/$defs/section_core" },
     "financial_picture": { "$ref": "#/$defs/section_core" },
-    "capital_structure_health": {
+    "capital_structure_health": { "$ref": "#/$defs/section_core" },
+    "investment_angle": { "$ref": "#/$defs/section_core" },
+    "conclusions": {
       "type": "object",
+      "description": "The decisive, section-spanning conclusions. Rendered inside their home sections by the UI.",
       "properties": {
-        "summary": { "type": "string" },
-        "plain_language_summary": { "type": "string" },
-        "analysis": { "type": "string" },
-        "key_points": { "type": "array", "items": { "type": "string" } },
-        "estimates": { "type": "array", "items": { "$ref": "#/$defs/estimate" } },
-        "confidence": { "$ref": "#/$defs/confidence" },
-        "sources_and_notes": { "type": "array", "items": { "type": "string" } },
-        "health_verdict": { "type": "string", "enum": ["healthy", "stretched", "distress_signals_present", "insufficient_data"] }
-      },
-      "required": ["summary", "plain_language_summary", "analysis", "key_points", "estimates", "confidence", "sources_and_notes", "health_verdict"],
-      "additionalProperties": false
-    },
-    "investment_angle": {
-      "type": "object",
-      "properties": {
-        "summary": { "type": "string" },
-        "plain_language_summary": { "type": "string" },
-        "analysis": { "type": "string" },
-        "key_points": { "type": "array", "items": { "type": "string" } },
-        "estimates": { "type": "array", "items": { "$ref": "#/$defs/estimate" } },
-        "confidence": { "$ref": "#/$defs/confidence" },
-        "sources_and_notes": { "type": "array", "items": { "type": "string" } },
+        "owner_motivation_read": { "type": "string", "description": "Decisive conclusion: what the owner probably wants, timeframe, deal implication" },
+        "health_verdict": { "type": "string", "enum": ["healthy", "stretched", "distress_signals_present", "insufficient_data"] },
         "moat_assessment": { "type": "string" },
         "exit_thesis": { "type": "string", "description": "Acquirer map + ranked exit routes + multiple context" },
         "deal_killers": {
@@ -140,7 +103,7 @@
         },
         "verdict": { "type": "string", "description": "The decisive bottom line, 2-4 sentences" }
       },
-      "required": ["summary", "plain_language_summary", "analysis", "key_points", "estimates", "confidence", "sources_and_notes", "moat_assessment", "exit_thesis", "deal_killers", "verdict"],
+      "required": ["owner_motivation_read", "health_verdict", "moat_assessment", "exit_thesis", "deal_killers", "verdict"],
       "additionalProperties": false
     },
     "what_we_dont_know": {
@@ -168,6 +131,6 @@
       "additionalProperties": false
     }
   },
-  "required": ["company_name", "data_period_note", "snapshot", "business_model", "ownership_control", "financial_picture", "capital_structure_health", "investment_angle", "what_we_dont_know"],
+  "required": ["company_name", "data_period_note", "snapshot", "business_model", "ownership_control", "financial_picture", "capital_structure_health", "investment_angle", "conclusions", "what_we_dont_know"],
   "additionalProperties": false
 }
