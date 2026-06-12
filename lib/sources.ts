@@ -34,9 +34,9 @@ export const DATA_SOURCES: DataSource[] = [
   },
   {
     id: "fmp_market_data",
-    label: "Market data via FMP (listed companies)",
+    label: "Market snapshot via FMP (listed companies)",
     description:
-      "Price, market cap, valuation multiples, margins for listed companies worldwide; also deterministic peer multiples. Free tier (250 calls/day) — responses are day-cached to stay frugal. Needs FMP_API_KEY.",
+      "Share price, market cap, sector, employees for any listed ticker (free tier; deeper metrics are premium-gated, so multiples come from web research). 1 day-cached call per company. Needs FMP_API_KEY.",
   },
   {
     id: "gleif",

@@ -37,7 +37,6 @@ export default function Home() {
   const [withPeerComps, setWithPeerComps] = useState(true);
   const [isListed, setIsListed] = useState(false);
   const [ticker, setTicker] = useState("");
-  const [peerTickers, setPeerTickers] = useState("");
   const [gathering, setGathering] = useState(false);
 
   // "Run a new analysis" links from a company page prefill the name.
@@ -101,10 +100,6 @@ export default function Home() {
           includePeerComps: withPeerComps,
           isListed,
           ticker: ticker.trim() || undefined,
-          peerTickers: peerTickers
-            .split(",")
-            .map((t) => t.trim())
-            .filter(Boolean),
         }),
       });
       if (!res.ok || !res.body) {
@@ -220,11 +215,7 @@ export default function Home() {
               <label>
                 Ticker <input value={ticker} onChange={(e) => setTicker(e.target.value)} size={8} placeholder="AAPL" />
               </label>
-            )}{" "}
-            <label>
-              Peer tickers for exact multiples (optional, comma-separated){" "}
-              <input value={peerTickers} onChange={(e) => setPeerTickers(e.target.value)} size={24} placeholder="NIBE-B.ST, 6367.T" />
-            </label>
+            )}
           </p>
           <p>
             <label>

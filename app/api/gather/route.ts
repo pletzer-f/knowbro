@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { gatherPublicData } from "@/engine/src/gather";
 import { companiesHouseBlock, companiesHouseConfigured, searchCompanyNumber } from "@/engine/src/sources/companiesHouse";
 import { secEdgarBlock } from "@/engine/src/sources/secEdgar";
-import { fmpBlock, fmpConfigured, fmpPeerMultiples } from "@/engine/src/sources/fmp";
+import { fmpBlock, fmpConfigured } from "@/engine/src/sources/fmp";
 import { gleifBlock } from "@/engine/src/sources/gleif";
 
 export const maxDuration = 600;
@@ -19,7 +19,6 @@ export async function POST(req: NextRequest) {
     includePeerComps?: boolean;
     isListed?: boolean;
     ticker?: string; // for listed companies: enables SEC EDGAR + market data
-    peerTickers?: string[]; // optional listed peers for deterministic multiples
   };
   try {
     body = await req.json();
@@ -96,15 +95,6 @@ export async function POST(req: NextRequest) {
             }
           }
         }
-        if (body.peerTickers?.length && enabled("fmp_market_data") && fmpConfigured()) {
-          try {
-            const block = await fmpPeerMultiples(body.peerTickers, todayIso);
-            if (block) emit(block + "\n\n");
-          } catch (e) {
-            emit(`[FMP peers error: ${(e as Error).message}]\n\n`);
-          }
-        }
-
         // 1c. Legal-entity / ownership graph (free, any country, LEI required).
         if (enabled("gleif")) {
           try {
