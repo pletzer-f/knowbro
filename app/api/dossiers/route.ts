@@ -13,9 +13,14 @@ export async function GET() {
   return NextResponse.json({ dossiers: data });
 }
 
-// Save a completed analysis (full structured output + reasoning trace + overrides).
+// Save a completed analysis (full structured output + reasoning trace +
+// overrides + any chat transcript that happened before saving).
 export async function POST(req: NextRequest) {
-  let body: { result?: AnalysisResult; overrides?: Record<string, string> };
+  let body: {
+    result?: AnalysisResult;
+    overrides?: Record<string, string>;
+    chat?: { role: "user" | "assistant"; content: string }[];
+  };
   try {
     body = await req.json();
   } catch {
@@ -42,5 +47,23 @@ export async function POST(req: NextRequest) {
     .select("id")
     .single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Carry over the pre-save chat so the conversation continues on the saved page.
+  const chat = (body.chat ?? []).filter(
+    (m) => (m.role === "user" || m.role === "assistant") && typeof m.content === "string" && m.content.trim()
+  );
+  if (chat.length > 0) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const { error: chatError } = await supabase.from("chat_messages").insert(
+      chat.map((m) => ({ user_id: user!.id, dossier_id: data.id, role: m.role, content: m.content }))
+    );
+    if (chatError) {
+      // Dossier saved; transcript failed — report without failing the save.
+      return NextResponse.json({ id: data.id, warning: `Chat transcript not saved: ${chatError.message}` });
+    }
+  }
+
   return NextResponse.json({ id: data.id });
 }

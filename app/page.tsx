@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import type { AnalysisResult, LensConfig } from "@/engine/src/types";
 import { resolveView } from "@/engine/src/lens";
 import DossierView, { CritiquePanel, type Overrides } from "@/components/DossierView";
+import ChatPanel, { type ChatMsg } from "@/components/ChatPanel";
 
 import investorLens from "@/engine/config/lenses/investor.json";
 import entrepreneurLens from "@/engine/config/lenses/entrepreneur.json";
@@ -27,6 +28,7 @@ export default function Home() {
   const [savedId, setSavedId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [lastLoadedNote, setLastLoadedNote] = useState("");
+  const [chatTranscript, setChatTranscript] = useState<ChatMsg[]>([]);
 
   const overridesKey = result ? `wba-overrides:${result.input.companyName}` : null;
 
@@ -195,7 +197,8 @@ export default function Home() {
                 const res = await fetch("/api/dossiers", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ result, overrides }),
+                  // Chat so far is saved with the dossier and continues there.
+                  body: JSON.stringify({ result, overrides, chat: chatTranscript }),
                 });
                 const json = await res.json();
                 setSaving(false);
@@ -217,6 +220,14 @@ export default function Home() {
           <CritiquePanel critique={result.critique} />
           <hr />
           <DossierView dossier={result.final} lens={lens} view={view} overrides={overrides} onOverride={handleOverride} />
+          <hr />
+          {savedId ? (
+            <p>
+              Chat moved to the <a href={`/dossiers/${savedId}`}>saved dossier</a> — it continues there.
+            </p>
+          ) : (
+            <ChatPanel result={result} companyName={result.input.companyName} onTranscriptChange={setChatTranscript} />
+          )}
         </div>
       )}
     </main>

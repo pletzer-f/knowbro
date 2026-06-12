@@ -2,13 +2,15 @@
 
 Company-analysis app whose value lives in one component: the **reasoning engine** that turns sparse public data into a confidence-tagged investment dossier. Everything else is plumbing. The UI is deliberately unstyled until a separate design pass.
 
-## Status: Phase 2 complete (engine + auth + per-user data)
+## Status: Phase 3 complete (engine + auth + per-user data + chat)
 
 Phase 1: inference chains, 7-section structured dossier schema, confidence logic, lens system with depth views (investor: Espresso / Boardroom / Deep Dive), self-critique (red-team) pass, reasoning traces, eval harness, functional input/output UI.
 
 Phase 2: Supabase invite-only auth (email+password, owner provisions accounts — no public signup), per-user data isolated by row-level security, saved dossiers (full output + trace + persisted estimate overrides), private per-company notes (auto-reused as engine input), source preferences (stored now, enforced by the Phase 4 pull layer).
 
-Not yet built (in order): scoped chatbot (3), live registry data (4), PDF export (5). See `docs/SPEC.md`.
+Phase 3: company-scoped chatbot on fresh results and saved dossiers — full dossier + source data + red-team critique in context, held to engine standards (confidence-tagged, inference shown, legitimacy boundary). Conversations persist per saved dossier; pre-save chat is carried over on save. Prompt lives in `engine/config/prompts/chat.md`; model/effort in `models.json` (`chat` pass).
+
+Not yet built (in order): live registry data (4), PDF export (5). See `docs/SPEC.md`.
 
 Supabase project: `wba-company-intel` (`iwqbymyponrhluousixb`, eu-central-1). Provision users at Dashboard → Authentication → Users → Add user (auto-confirm on).
 

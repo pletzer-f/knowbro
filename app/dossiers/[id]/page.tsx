@@ -7,6 +7,7 @@ import { use, useEffect, useState } from "react";
 import type { Critique, Dossier, LensConfig, AnalysisInput, TraceStep } from "@/engine/src/types";
 import { resolveView } from "@/engine/src/lens";
 import DossierView, { CritiquePanel, type Overrides } from "@/components/DossierView";
+import ChatPanel from "@/components/ChatPanel";
 
 import investorLens from "@/engine/config/lenses/investor.json";
 import entrepreneurLens from "@/engine/config/lenses/entrepreneur.json";
@@ -130,6 +131,8 @@ export default function SavedDossierPage({ params }: { params: Promise<{ id: str
       <CritiquePanel critique={row.critique} />
       <hr />
       <DossierView dossier={row.dossier} lens={lens} view={view} overrides={overrides} onOverride={handleOverride} />
+      <hr />
+      <ChatPanel dossierId={row.id} companyName={row.company_name} />
       <hr />
       <h3>My private notes on {row.company_name}</h3>
       <p>

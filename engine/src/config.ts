@@ -40,13 +40,19 @@ export interface PassModelConfig {
 
 export interface ModelsConfig {
   provider: string;
-  passes: { draft: PassModelConfig; critique: PassModelConfig; revise: PassModelConfig };
+  passes: {
+    draft: PassModelConfig;
+    critique: PassModelConfig;
+    revise: PassModelConfig;
+    chat: PassModelConfig;
+  };
 }
 
 export interface EngineConfig {
   analysisSystemPrompt: string; // persona + all chains + output instructions
   critiqueSystemPrompt: string;
   reviseSystemPrompt: string;
+  chatSystemPrompt: string;
   dossierSchema: object;
   critiqueSchema: object;
   models: ModelsConfig;
@@ -69,6 +75,7 @@ export function loadEngineConfig(): EngineConfig {
   const outputInstructions = read("prompts/output-instructions.md");
   const critiquePrompt = read("prompts/critique.md");
   const revisePrompt = read("prompts/revise.md");
+  const chatPrompt = read("prompts/chat.md");
 
   const dossierSchema = stripSchemaComments(JSON.parse(read("schema/dossier.schema.json")));
   const critiqueSchema = stripSchemaComments(JSON.parse(read("schema/critique.schema.json")));
@@ -94,6 +101,7 @@ export function loadEngineConfig(): EngineConfig {
     outputInstructions,
     critiquePrompt,
     revisePrompt,
+    chatPrompt,
     JSON.stringify(dossierSchema),
     JSON.stringify(critiqueSchema),
     JSON.stringify(models),
@@ -104,6 +112,7 @@ export function loadEngineConfig(): EngineConfig {
     analysisSystemPrompt,
     critiqueSystemPrompt: stripComments(critiquePrompt),
     reviseSystemPrompt: stripComments(revisePrompt),
+    chatSystemPrompt: stripComments(chatPrompt),
     dossierSchema,
     critiqueSchema,
     models,

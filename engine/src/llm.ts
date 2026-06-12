@@ -19,8 +19,29 @@ export interface StructuredResult<T> {
   durationMs: number;
 }
 
+export interface ChatTurn {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface TextStreamCall {
+  system: string;
+  messages: ChatTurn[];
+  pass: PassModelConfig;
+  /** Called with each text delta as it streams. */
+  onDelta: (text: string) => void;
+}
+
+export interface TextStreamResult {
+  text: string;
+  usage: PassUsage;
+  model: string;
+  durationMs: number;
+}
+
 export interface LlmProvider {
   completeStructured<T>(call: StructuredCall): Promise<StructuredResult<T>>;
+  streamText(call: TextStreamCall): Promise<TextStreamResult>;
 }
 
 class AnthropicProvider implements LlmProvider {
@@ -85,6 +106,39 @@ class AnthropicProvider implements LlmProvider {
 
     return {
       output,
+      usage: {
+        inputTokens: message.usage.input_tokens,
+        outputTokens: message.usage.output_tokens,
+        cacheReadTokens: message.usage.cache_read_input_tokens ?? 0,
+        cacheWriteTokens: message.usage.cache_creation_input_tokens ?? 0,
+      },
+      model: message.model,
+      durationMs: Date.now() - started,
+    };
+  }
+
+  async streamText(call: TextStreamCall): Promise<TextStreamResult> {
+    const started = Date.now();
+
+    const stream = this.client.messages.stream({
+      model: call.pass.model,
+      max_tokens: call.pass.maxTokens,
+      thinking: { type: "adaptive" },
+      output_config: { effort: call.pass.effort },
+      system: [{ type: "text", text: call.system, cache_control: { type: "ephemeral" } }],
+      messages: call.messages.map((m) => ({ role: m.role, content: m.content })),
+    });
+
+    stream.on("text", (delta) => call.onDelta(delta));
+
+    const message = await stream.finalMessage();
+    const text = message.content
+      .filter((b) => b.type === "text")
+      .map((b) => (b.type === "text" ? b.text : ""))
+      .join("");
+
+    return {
+      text,
       usage: {
         inputTokens: message.usage.input_tokens,
         outputTokens: message.usage.output_tokens,
