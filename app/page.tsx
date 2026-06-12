@@ -24,6 +24,9 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [overrides, setOverrides] = useState<Overrides>({});
+  const [savedId, setSavedId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [lastLoadedNote, setLastLoadedNote] = useState("");
 
   const overridesKey = result ? `wba-overrides:${result.input.companyName}` : null;
 
@@ -44,11 +47,34 @@ export default function Home() {
     });
   };
 
+  // The note is the per-company private-context store: prefill it when a
+  // company name is entered (unless the user already typed something new).
+  const loadNote = async () => {
+    const company = companyName.trim();
+    if (!company) return;
+    const res = await fetch(`/api/notes?company=${encodeURIComponent(company)}`);
+    if (!res.ok) return;
+    const { content } = await res.json();
+    if (content && (userNotes.trim() === "" || userNotes === lastLoadedNote)) {
+      setUserNotes(content);
+      setLastLoadedNote(content);
+    }
+  };
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setResult(null);
+    setSavedId(null);
+    // Persist the note so it's reusable on future analyses of this company.
+    if (userNotes.trim()) {
+      fetch("/api/notes", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ company_name: companyName.trim(), content: userNotes }),
+      }).catch(() => {});
+    }
     try {
       const res = await fetch("/api/analyze", {
         method: "POST",
@@ -93,7 +119,7 @@ export default function Home() {
           <label>
             Company name
             <br />
-            <input value={companyName} onChange={(e) => setCompanyName(e.target.value)} size={60} required />
+            <input value={companyName} onChange={(e) => setCompanyName(e.target.value)} onBlur={loadNote} size={60} required />
           </label>
         </p>
         <p>
@@ -105,7 +131,7 @@ export default function Home() {
         </p>
         <p>
           <label>
-            Your private notes (optional — your own lawfully-held knowledge)
+            Your private notes (optional — your own lawfully-held knowledge; saved per company and reused on future analyses)
             <br />
             <textarea value={userNotes} onChange={(e) => setUserNotes(e.target.value)} rows={4} cols={100} />
           </label>
@@ -161,6 +187,25 @@ export default function Home() {
         <div>
           <hr />
           <p>
+            <button
+              type="button"
+              disabled={saving || savedId !== null}
+              onClick={async () => {
+                setSaving(true);
+                const res = await fetch("/api/dossiers", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ result, overrides }),
+                });
+                const json = await res.json();
+                setSaving(false);
+                if (res.ok) setSavedId(json.id);
+                else setError(json.error);
+              }}
+            >
+              {savedId ? "Saved" : saving ? "Saving..." : "Save dossier"}
+            </button>{" "}
+            {savedId && <a href={`/dossiers/${savedId}`}>open saved dossier</a>}{" "}
             <button type="button" onClick={downloadTrace}>
               Download full reasoning trace (JSON)
             </button>{" "}
