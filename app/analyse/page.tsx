@@ -79,6 +79,8 @@ export default function ResearchConsole() {
   const [userNotes, setUserNotes] = useState("");
   const [lastLoadedNote, setLastLoadedNote] = useState("");
   const [gathering, setGathering] = useState(false);
+  const [gatherElapsed, setGatherElapsed] = useState(0);
+  const gatherTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Run config
   const [lensId, setLensId] = useState("investor");
@@ -152,6 +154,20 @@ export default function ResearchConsole() {
     }
   };
 
+  useEffect(() => {
+    if (gathering) {
+      const started = Date.now();
+      setGatherElapsed(0);
+      gatherTimer.current = setInterval(() => setGatherElapsed(Math.round((Date.now() - started) / 1000)), 1000);
+    } else if (gatherTimer.current) {
+      clearInterval(gatherTimer.current);
+      gatherTimer.current = null;
+    }
+    return () => {
+      if (gatherTimer.current) clearInterval(gatherTimer.current);
+    };
+  }, [gathering]);
+
   const gather = async () => {
     const company = companyName.trim();
     if (!company || gathering) return;
@@ -182,18 +198,31 @@ export default function ResearchConsole() {
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let collected = rawData.trim() ? rawData + "\n\n" : "";
+      let buffer = "";
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        collected += decoder.decode(value, { stream: true });
-        const snapshot = collected;
-        setRawData(snapshot);
-        // light-touch live status: mark a chip done when its signature appears
-        setSourceState((prev) => {
-          const next = { ...prev };
-          for (const s of applicable) if (next[s.id] !== "done" && s.detect.test(snapshot)) next[s.id] = "done";
-          return next;
-        });
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          let ev: { type: string; text?: string };
+          try {
+            ev = JSON.parse(line);
+          } catch {
+            continue; // ignore a partial/garbled line
+          }
+          if (ev.type !== "text" || !ev.text) continue; // skip heartbeats / done
+          collected += ev.text;
+          const snapshot = collected;
+          setRawData(snapshot);
+          setSourceState((prev) => {
+            const next = { ...prev };
+            for (const s of applicable) if (next[s.id] !== "done" && s.detect.test(snapshot)) next[s.id] = "done";
+            return next;
+          });
+        }
       }
       setSourceState((prev) => {
         const next = { ...prev };
@@ -367,10 +396,12 @@ export default function ResearchConsole() {
       </div>
       <p style={{ marginTop: "var(--space-3)" }}>
         <button type="button" className="primary" onClick={gather} disabled={gathering || !companyName.trim()}>
-          {gathering ? "Gathering…" : gatheredOnce ? "Re-gather public data" : "Gather public data"}
+          {gathering ? `Gathering… ${Math.floor(gatherElapsed / 60)}m ${gatherElapsed % 60}s` : gatheredOnce ? "Re-gather public data" : "Gather public data"}
         </button>{" "}
         <span className="kb-meter">
-          public sources only · review before running
+          {gathering
+            ? "reading registries, web & press — up to ~4 min; the pack fills when ready"
+            : "public sources only · review before running"}
         </span>
       </p>
 

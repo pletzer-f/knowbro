@@ -40,10 +40,24 @@ export async function POST(req: NextRequest) {
   const todayIso = new Date().toISOString().slice(0, 10);
   const isUk = /^(uk|united kingdom|gb|great britain|england|scotland|wales)$/i.test(body.country?.trim() ?? "");
 
+  // NDJSON: {type:"text",text} for content, {type:"hb"} keepalives during the
+  // silent web-search phase (so the streaming connection never idles out on
+  // serverless), {type:"done"}. The client appends only text deltas.
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
-      const emit = (s: string) => controller.enqueue(encoder.encode(s));
+      let closed = false;
+      const send = (obj: unknown) => {
+        if (!closed) controller.enqueue(encoder.encode(JSON.stringify(obj) + "\n"));
+      };
+      const emit = (s: string) => send({ type: "text", text: s });
+      const heartbeat = setInterval(() => send({ type: "hb" }), 8000);
+      const finish = () => {
+        if (closed) return;
+        clearInterval(heartbeat);
+        closed = true;
+        controller.close();
+      };
       try {
         // 1. Official registry connector (UK), deterministic and first.
         if (isUk && enabled("companies_house_uk")) {
@@ -125,15 +139,17 @@ export async function POST(req: NextRequest) {
           emit("[Web research is disabled in your source preferences — only registry connectors were used.]\n");
         }
 
-        controller.close();
+        send({ type: "done" });
+        finish();
       } catch (e) {
         emit(`\n\n[Error: ${(e as Error).message}]`);
-        controller.close();
+        send({ type: "done" });
+        finish();
       }
     },
   });
 
   return new Response(stream, {
-    headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-cache" },
+    headers: { "Content-Type": "application/x-ndjson; charset=utf-8", "Cache-Control": "no-cache" },
   });
 }

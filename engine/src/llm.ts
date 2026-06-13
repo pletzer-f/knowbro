@@ -128,47 +128,79 @@ class AnthropicProvider implements LlmProvider {
 
   async researchText(call: TextStreamCall): Promise<TextStreamResult> {
     const started = Date.now();
+    // Gather runs a web-search agentic loop on Opus + adaptive thinking. The
+    // model is silent (thinking + searching) for a couple of minutes and only
+    // writes the pack AT THE END, so the timeout must be a generous BACKSTOP
+    // (let it complete, don't truncate) — the route's heartbeat keeps the
+    // connection alive through the silent phase. Cutting it short yields an
+    // empty pack. 300s sits under the /api/gather route's 600s maxDuration.
+    const HARD_TIMEOUT_MS = 300_000;
+    const MAX_ROUNDS = 2;
     let usage: PassUsage = { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0 };
     let model = call.pass.model;
     let text = "";
+    let stoppedEarly = false;
 
-    // Server-side tools run a server-side loop; it may pause (stop_reason
-    // "pause_turn") and must be resumed by re-sending the conversation.
-    const messages: Anthropic.MessageParam[] = call.messages.map((m) => ({ role: m.role, content: m.content }));
-    for (let round = 0; round < 8; round++) {
-      const stream = this.client.messages.stream({
-        model: call.pass.model,
-        max_tokens: call.pass.maxTokens,
-        ...tuning(call.pass),
-        system: [{ type: "text", text: call.system, cache_control: { type: "ephemeral" } }],
-        messages,
-        tools: [
-          { type: "web_search_20260209", name: "web_search", max_uses: 12 },
-          { type: "web_fetch_20260209", name: "web_fetch", max_uses: 15 },
-        ],
-      } as Anthropic.MessageStreamParams);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), HARD_TIMEOUT_MS);
+    try {
+      const messages: Anthropic.MessageParam[] = call.messages.map((m) => ({ role: m.role, content: m.content }));
+      for (let round = 0; round < MAX_ROUNDS; round++) {
+        if (controller.signal.aborted) break;
+        const stream = this.client.messages.stream(
+          {
+            model: call.pass.model,
+            max_tokens: call.pass.maxTokens,
+            ...tuning(call.pass),
+            system: [{ type: "text", text: call.system, cache_control: { type: "ephemeral" } }],
+            messages,
+            // web_search only — web_fetch (reading whole pages) is the slow
+            // part that prevents the loop from converging to synthesis.
+            tools: [{ type: "web_search_20260209", name: "web_search", max_uses: 5 }],
+          } as Anthropic.MessageStreamParams,
+          { signal: controller.signal }
+        );
 
-      stream.on("text", (delta) => {
-        text += delta;
-        call.onDelta(delta);
-      });
+        stream.on("text", (delta) => {
+          text += delta;
+          call.onDelta(delta);
+        });
 
-      const message = await stream.finalMessage();
-      usage = {
-        inputTokens: usage.inputTokens + message.usage.input_tokens,
-        outputTokens: usage.outputTokens + message.usage.output_tokens,
-        cacheReadTokens: usage.cacheReadTokens + (message.usage.cache_read_input_tokens ?? 0),
-        cacheWriteTokens: usage.cacheWriteTokens + (message.usage.cache_creation_input_tokens ?? 0),
-      };
-      model = message.model;
+        let message;
+        try {
+          message = await stream.finalMessage();
+        } catch (e) {
+          // Abort (timeout) or transient stream error: keep what streamed.
+          if (controller.signal.aborted) {
+            stoppedEarly = true;
+            break;
+          }
+          throw e;
+        }
+        usage = {
+          inputTokens: usage.inputTokens + message.usage.input_tokens,
+          outputTokens: usage.outputTokens + message.usage.output_tokens,
+          cacheReadTokens: usage.cacheReadTokens + (message.usage.cache_read_input_tokens ?? 0),
+          cacheWriteTokens: usage.cacheWriteTokens + (message.usage.cache_creation_input_tokens ?? 0),
+        };
+        model = message.model;
 
-      if (message.stop_reason === "pause_turn") {
-        messages.push({ role: "assistant", content: message.content });
-        continue;
+        if (message.stop_reason === "pause_turn") {
+          messages.push({ role: "assistant", content: message.content });
+          continue;
+        }
+        break;
       }
-      break;
+    } finally {
+      clearTimeout(timer);
     }
 
+    if (stoppedEarly) {
+      const note =
+        "\n\n[Gather hit its time limit — returning what was found. Re-gather, narrow the country/ticker, or paste a key page above if something important is missing.]";
+      text += note;
+      call.onDelta(note);
+    }
     return { text, usage, model, durationMs: Date.now() - started };
   }
 
