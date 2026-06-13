@@ -1,0 +1,10 @@
+/* ============================================================
+   KnowBro — Webfonts
+   NOTE: served from Google Fonts CDN. The compiler ships these
+   @import targets to consumers; for a fully offline/self-hosted
+   bundle, swap for local @font-face + .woff2 binaries.
+   Newsreader   — literary serif display
+   Hanken Grotesk — precise grotesk UI/body
+   IBM Plex Mono  — data, scores, source refs
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap');

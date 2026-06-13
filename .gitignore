@@ -10,3 +10,5 @@ engine/evals/runs/
 next-env.d.ts
 .DS_Store
 .vercel
+
+.design-import/

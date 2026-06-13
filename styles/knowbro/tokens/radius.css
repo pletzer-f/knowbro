@@ -1,0 +1,22 @@
+/* ============================================================
+   KnowBro — Radius tokens
+   Restrained, sharp-leaning corners. The brand reads as
+   precise instrumentation, not soft consumer UI.
+   ============================================================ */
+
+:root {
+  --radius-0:    0;
+  --radius-xs:   2px;    /* ticks, chips, inline marks       */
+  --radius-sm:   4px;    /* inputs, buttons, badges          */
+  --radius-md:   6px;    /* cards, menus                     */
+  --radius-lg:   10px;   /* panels, dialogs                  */
+  --radius-xl:   14px;   /* large surfaces, modals           */
+  --radius-pill: 999px;  /* pills, avatars, toggles          */
+
+  /* Semantic */
+  --radius-button: var(--radius-sm);
+  --radius-input:  var(--radius-sm);
+  --radius-card:   var(--radius-md);
+  --radius-panel:  var(--radius-lg);
+  --radius-badge:  var(--radius-xs);
+}

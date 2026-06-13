@@ -29,18 +29,32 @@ export type OnEdit = (path: string, value: string | null) => void;
 
 export function ConfidenceBadge({ confidence, label }: { confidence: Confidence; label?: string }) {
   const [open, setOpen] = useState(false);
+  const cls =
+    confidence.level === "high" ? "kb-conf--high" : confidence.level === "medium" ? "kb-conf--med" : "kb-conf--low";
   return (
     <span>
-      <button type="button" onClick={() => setOpen(!open)} title="Click to see why">
-        [{label ? `${label}: ` : ""}confidence: {confidence.level}]
+      <button
+        type="button"
+        className={`kb-conf ${cls}`}
+        onClick={() => setOpen(!open)}
+        title="Click to see how confident, and why"
+      >
+        {label ? `${label} · ` : ""}
+        {confidence.level} confidence
       </button>
       {open && (
-        <blockquote>
+        <blockquote className="kb-conf-rationale">
           <small>{confidence.rationale}</small>
         </blockquote>
       )}
     </span>
   );
+}
+
+/** Basis tag — distinguishes filed fact from inference (a core honesty signal). */
+export function BasisTag({ basis }: { basis: string }) {
+  const inferred = basis === "estimate" || basis === "inference";
+  return <span className={`kb-basis ${inferred ? "kb-basis--estimate" : ""}`}>{basis.replace("_", " ")}</span>;
 }
 
 function EstimateView({
@@ -71,21 +85,21 @@ function EstimateView({
           </button>
         </em>
       )}{" "}
-      <small>[{estimate.basis.replace("_", " ")}]</small> <ConfidenceBadge confidence={estimate.confidence} />{" "}
-      <button type="button" onClick={() => setShowPath(!showPath)}>
+      <BasisTag basis={estimate.basis} /> <ConfidenceBadge confidence={estimate.confidence} />{" "}
+      <button type="button" className="kb-mini" onClick={() => setShowPath(!showPath)}>
         {showPath ? "hide" : "how was this derived?"}
       </button>{" "}
       {!editing ? (
-        <button type="button" onClick={() => { setDraftValue(effectiveValue); setEditing(true); }}>
-          override value
+        <button type="button" className="kb-mini" onClick={() => { setDraftValue(effectiveValue); setEditing(true); }}>
+          override
         </button>
       ) : (
         <span>
           <input value={draftValue} onChange={(e) => setDraftValue(e.target.value)} size={40} />
-          <button type="button" onClick={() => { onOverride(estimate.id, draftValue); setEditing(false); }}>
+          <button type="button" className="kb-mini" onClick={() => { onOverride(estimate.id, draftValue); setEditing(false); }}>
             save
           </button>
-          <button type="button" onClick={() => setEditing(false)}>cancel</button>
+          <button type="button" className="kb-mini" onClick={() => setEditing(false)}>cancel</button>
         </span>
       )}
       {showPath && (
@@ -349,14 +363,14 @@ export default function DossierView({
           </p>
           <p>{s.headline_view}</p>
           {s.key_numbers.length > 0 && (
-            <table border={1} cellPadding={4}>
+            <table>
               <tbody>
                 {s.key_numbers.map((n, i) => (
                   <tr key={i}>
                     <td>{n.label}</td>
-                    <td>{n.value}</td>
+                    <td className="kb-num">{n.value}</td>
                     <td>
-                      <small>{n.basis.replace("_", " ")}</small>
+                      <BasisTag basis={n.basis} />
                     </td>
                   </tr>
                 ))}

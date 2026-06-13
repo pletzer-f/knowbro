@@ -1,0 +1,113 @@
+/* ============================================================
+   KnowBro — Base layer
+   Minimal element defaults + a few brand primitives (grid motif,
+   eyebrow labels, confidence chips) used across specimens & kits.
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  font-weight: var(--weight-regular);
+  color: var(--text-body);
+  background: var(--surface-page);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "ss01", "cv01";
+}
+
+::selection { background: var(--selection); }
+
+a { color: var(--text-link); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 0.18em; }
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--radius-xs);
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+  margin: var(--space-6) 0;
+}
+
+code, kbd, samp { font-family: var(--font-mono); font-size: 0.92em; }
+
+/* --- Display headings --------------------------------------- */
+.kb-display {
+  font-family: var(--display-font);
+  font-weight: var(--display-weight);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-strong);
+}
+.kb-heading {
+  font-family: var(--heading-font);
+  font-weight: var(--heading-weight);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-snug);
+  color: var(--text-strong);
+}
+
+/* --- Eyebrow / overline label ------------------------------- */
+.kb-eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--text-subtle);
+}
+
+/* --- Mono data figure --------------------------------------- */
+.kb-data {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-mono);
+  color: var(--text-strong);
+}
+
+/* --- Blueprint grid motif (decorative background) ----------- */
+.kb-grid-bg {
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.kb-grid-bg--fine {
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 12px 12px;
+}
+
+/* --- Confidence chip ---------------------------------------- */
+.kb-conf {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1_5);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-xs);
+  line-height: 1.4;
+}
+.kb-conf::before {
+  content: "";
+  width: 6px; height: 6px;
+  border-radius: var(--radius-pill);
+  background: currentColor;
+}
+.kb-conf--high { color: var(--conf-high-fg); background: var(--conf-high-bg); }
+.kb-conf--med  { color: var(--conf-med-fg);  background: var(--conf-med-bg); }
+.kb-conf--low  { color: var(--conf-low-fg);  background: var(--conf-low-bg); }

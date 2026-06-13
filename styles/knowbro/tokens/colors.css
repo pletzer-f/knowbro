@@ -1,0 +1,162 @@
+/* ============================================================
+   KnowBro — Color tokens
+   Deep ink-blue + warm-paper neutrals, electric Signal accent,
+   and a teal/amber/clay confidence scale.
+   ============================================================ */
+
+:root {
+  /* --- Warm neutral (paper) scale --------------------------- */
+  --neutral-50:  #F8F5EF;
+  --neutral-100: #EFEBE1;
+  --neutral-200: #E2DCD0;
+  --neutral-300: #CFC8B9;
+  --neutral-400: #A8A091;
+  --neutral-500: #847C6E;
+  --neutral-600: #635C50;
+  --neutral-700: #46413A;
+  --neutral-800: #2D2A25;
+  --neutral-900: #1C1A17;
+  --neutral-950: #100F0D;
+
+  /* --- Ink-blue scale (brand primary + dark surfaces) ------- */
+  --ink-50:  #EAF0F9;
+  --ink-100: #CBD9ED;
+  --ink-200: #9DB4D6;
+  --ink-300: #6B8BBC;
+  --ink-400: #436AA0;
+  --ink-500: #2C4F82;
+  --ink-600: #1F3D68;
+  --ink-700: #182F50;
+  --ink-800: #122440;
+  --ink-900: #0E1C31;
+  --ink-950: #0A1322;
+
+  /* --- Signal accent (electric azure — inferred insight) --- */
+  --signal-200: #B7CCFF;
+  --signal-300: #84A7FF;
+  --signal-400: #5285FF;
+  --signal-500: #2E6BFF;
+  --signal-600: #1A54E0;
+  --signal-700: #1342B4;
+
+  /* --- Confidence scale (insight quality) ------------------ */
+  --confidence-high:   #14A37F;  /* teal-green — high confidence  */
+  --confidence-high-2: #0C7C60;
+  --confidence-med:    #C9831F;  /* amber — medium confidence     */
+  --confidence-med-2:  #9A6413;
+  --confidence-low:    #C24A3A;  /* clay — low confidence / weak  */
+  --confidence-low-2:  #9C3727;
+
+  /* --- Status (reuse confidence hues) ---------------------- */
+  --success: var(--confidence-high);
+  --warning: var(--confidence-med);
+  --danger:  var(--confidence-low);
+  --info:    var(--signal-500);
+
+  /* --- Pure ------------------------------------------------ */
+  --white: #FFFFFF;
+  --black: #0A0908;
+}
+
+/* ============================================================
+   SEMANTIC ALIASES — Light theme (warm paper, default)
+   ============================================================ */
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  /* Surfaces */
+  --surface-page:    var(--neutral-50);
+  --surface-card:    var(--white);
+  --surface-sunken:  var(--neutral-100);
+  --surface-raised:  var(--white);
+  --surface-inverse: var(--ink-950);
+  --surface-hover:   var(--neutral-100);
+  --surface-active:  var(--neutral-200);
+
+  /* Text */
+  --text-strong:   var(--ink-950);
+  --text-body:     var(--neutral-800);
+  --text-muted:    var(--neutral-600);
+  --text-subtle:   var(--neutral-500);
+  --text-inverse:  var(--neutral-50);
+  --text-link:     var(--signal-600);
+  --text-on-accent: var(--white);
+
+  /* Borders & lines */
+  --border-subtle: var(--neutral-200);
+  --border-default:var(--neutral-300);
+  --border-strong: var(--neutral-400);
+  --border-focus:  var(--signal-500);
+  --grid-line:     rgba(28, 26, 23, 0.06);  /* blueprint grid */
+
+  /* Brand / accent */
+  --brand:         var(--ink-600);
+  --brand-hover:   var(--ink-700);
+  --accent:        var(--signal-500);
+  --accent-hover:  var(--signal-600);
+  --accent-soft:   rgba(46, 107, 255, 0.10);
+
+  /* Confidence (on light) */
+  --conf-high-fg: var(--confidence-high-2);
+  --conf-high-bg: rgba(20, 163, 127, 0.12);
+  --conf-med-fg:  var(--confidence-med-2);
+  --conf-med-bg:  rgba(201, 131, 31, 0.13);
+  --conf-low-fg:  var(--confidence-low-2);
+  --conf-low-bg:  rgba(194, 74, 58, 0.12);
+
+  /* Overlay */
+  --overlay: rgba(14, 28, 49, 0.42);
+  --selection: rgba(46, 107, 255, 0.18);
+}
+
+/* ============================================================
+   SEMANTIC ALIASES — Dark theme (deep ink)
+   ============================================================ */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Surfaces */
+  --surface-page:    var(--ink-950);
+  --surface-card:    var(--ink-900);
+  --surface-sunken:  #08101C;
+  --surface-raised:  var(--ink-800);
+  --surface-inverse: var(--neutral-50);
+  --surface-hover:   rgba(255, 255, 255, 0.04);
+  --surface-active:  rgba(255, 255, 255, 0.08);
+
+  /* Text */
+  --text-strong:   #F4F1EA;
+  --text-body:     #CFD6E2;
+  --text-muted:    #8F9AAD;
+  --text-subtle:   #67738A;
+  --text-inverse:  var(--ink-950);
+  --text-link:     var(--signal-300);
+  --text-on-accent: var(--white);
+
+  /* Borders & lines */
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-default:rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.22);
+  --border-focus:  var(--signal-400);
+  --grid-line:     rgba(132, 167, 255, 0.07);
+
+  /* Brand / accent */
+  --brand:         var(--signal-500);
+  --brand-hover:   var(--signal-400);
+  --accent:        var(--signal-400);
+  --accent-hover:  var(--signal-300);
+  --accent-soft:   rgba(82, 133, 255, 0.16);
+
+  /* Confidence (on dark) */
+  --conf-high-fg: #3AD3A8;
+  --conf-high-bg: rgba(20, 163, 127, 0.18);
+  --conf-med-fg:  #E8A94A;
+  --conf-med-bg:  rgba(201, 131, 31, 0.18);
+  --conf-low-fg:  #E37665;
+  --conf-low-bg:  rgba(194, 74, 58, 0.18);
+
+  /* Overlay */
+  --overlay: rgba(4, 9, 17, 0.62);
+  --selection: rgba(82, 133, 255, 0.28);
+}

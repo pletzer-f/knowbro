@@ -6,6 +6,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import Logo from "@/components/Logo";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -30,12 +31,13 @@ export default function LoginPage() {
   };
 
   return (
-    <main>
-      <h1>Company Intelligence — sign in</h1>
-      <p>
-        <small>Invite-only. Accounts are provisioned by the owner.</small>
+    <main className="kb-narrow" style={{ paddingTop: "var(--space-20)" }}>
+      <Logo markSize={32} />
+      <h1 style={{ marginTop: "var(--space-6)" }}>We looked into it.</h1>
+      <p style={{ color: "var(--text-muted)" }}>
+        KnowBro is invite-only. Sign in to your dossiers, models, and analysis.
       </p>
-      <form onSubmit={submit}>
+      <form onSubmit={submit} style={{ marginTop: "var(--space-6)" }}>
         <p>
           <label>
             Email

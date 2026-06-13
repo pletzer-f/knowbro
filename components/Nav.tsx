@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import Logo from "@/components/Logo";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function Nav() {
   const router = useRouter();
@@ -14,13 +16,19 @@ export default function Nav() {
   };
 
   return (
-    <nav>
-      <Link href="/">My companies</Link> | <Link href="/analyse">Research a company</Link> |{" "}
-      <Link href="/settings">Source preferences</Link> | <Link href="/account">Account</Link> |{" "}
-      <button type="button" onClick={signOut}>
+    <nav className="kb-nav">
+      <Link href="/" aria-label="KnowBro home">
+        <Logo />
+      </Link>
+      <Link href="/">Companies</Link>
+      <Link href="/analyse">Research</Link>
+      <Link href="/settings">Sources</Link>
+      <Link href="/account">Account</Link>
+      <span className="kb-nav-spacer" />
+      <ThemeToggle />
+      <button type="button" className="kb-mini" onClick={signOut}>
         Sign out
       </button>
-      <hr />
     </nav>
   );
 }

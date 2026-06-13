@@ -1,0 +1,54 @@
+/* ============================================================
+   KnowBro — Typography tokens
+   Newsreader (serif display) · Hanken Grotesk (sans UI/body)
+   · IBM Plex Mono (data / scores / source refs)
+   ============================================================ */
+
+:root {
+  /* --- Families -------------------------------------------- */
+  --font-serif: "Newsreader", "Iowan Old Style", Georgia, "Times New Roman", serif;
+  --font-sans:  "Hanken Grotesk", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --font-mono:  "IBM Plex Mono", "SFMono-Regular", "Menlo", ui-monospace, monospace;
+
+  /* --- Type scale (1.250 major-third, 16px base) ---------- */
+  --text-2xs:  0.6875rem;  /* 11px — micro labels, ticks      */
+  --text-xs:   0.75rem;    /* 12px — captions, source refs    */
+  --text-sm:   0.8125rem;  /* 13px — secondary UI             */
+  --text-base: 0.9375rem;  /* 15px — body / UI default        */
+  --text-md:   1.0625rem;  /* 17px — lead paragraph           */
+  --text-lg:   1.3125rem;  /* 21px — card titles              */
+  --text-xl:   1.625rem;   /* 26px — section heads            */
+  --text-2xl:  2.0625rem;  /* 33px — page titles              */
+  --text-3xl:  2.625rem;   /* 42px — display                  */
+  --text-4xl:  3.375rem;   /* 54px — hero                     */
+  --text-5xl:  4.5rem;     /* 72px — statement                */
+
+  /* --- Weights -------------------------------------------- */
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+  /* --- Line heights --------------------------------------- */
+  --leading-tight:  1.06;  /* display headlines               */
+  --leading-snug:   1.22;  /* sub-heads                       */
+  --leading-normal: 1.5;   /* body                            */
+  --leading-relaxed:1.65;  /* long-form reading               */
+
+  /* --- Letter spacing ------------------------------------- */
+  --tracking-tight:  -0.02em;  /* large serif display         */
+  --tracking-snug:   -0.01em;  /* headings                    */
+  --tracking-normal: 0em;
+  --tracking-wide:   0.04em;   /* small-caps UI labels        */
+  --tracking-mono:   0.02em;   /* mono data labels            */
+  --tracking-caps:   0.12em;   /* eyebrow / overline labels   */
+
+  /* --- Semantic roles ------------------------------------- */
+  --display-font:   var(--font-serif);
+  --display-weight: var(--weight-regular);
+  --heading-font:   var(--font-sans);
+  --heading-weight: var(--weight-semibold);
+  --body-font:      var(--font-sans);
+  --label-font:     var(--font-sans);
+  --data-font:      var(--font-mono);
+}

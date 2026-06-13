@@ -1,0 +1,283 @@
+/* ============================================================
+   KnowBro — global stylesheet
+   1. design-system tokens (vendored from Claude Design)
+   2. an element layer that styles the app's semantic HTML on-brand
+   The app is built from plain HTML elements, so this restyles
+   every surface coherently. Brand primitives (.kb-conf, .kb-eyebrow,
+   .kb-data, .kb-grid-bg, .kb-display, .kb-heading) come from base.css.
+   ============================================================ */
+@import "../styles/knowbro/tokens/fonts.css";
+@import "../styles/knowbro/tokens/colors.css";
+@import "../styles/knowbro/tokens/typography.css";
+@import "../styles/knowbro/tokens/spacing.css";
+@import "../styles/knowbro/tokens/radius.css";
+@import "../styles/knowbro/tokens/shadow.css";
+@import "../styles/knowbro/tokens/motion.css";
+@import "../styles/knowbro/tokens/base.css";
+
+/* ---- Page frame -------------------------------------------------- */
+body {
+  min-height: 100vh;
+}
+main {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: var(--space-8) var(--gutter) var(--space-20);
+}
+main.kb-narrow {
+  max-width: 720px;
+}
+
+/* ---- Typography -------------------------------------------------- */
+h1 {
+  font-family: var(--display-font);
+  font-weight: var(--display-weight);
+  font-size: var(--text-2xl);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-strong);
+  margin: 0 0 var(--space-2);
+}
+h2 {
+  font-family: var(--font-sans);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-xl);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-snug);
+  color: var(--text-strong);
+  margin: var(--space-8) 0 var(--space-3);
+}
+h3 {
+  font-family: var(--font-sans);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-lg);
+  line-height: var(--leading-snug);
+  color: var(--text-strong);
+  margin: var(--space-6) 0 var(--space-2);
+}
+h4 {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--text-subtle);
+  margin: var(--space-5) 0 var(--space-2);
+}
+p { margin: 0 0 var(--space-3); }
+small { font-size: var(--text-xs); color: var(--text-muted); }
+strong { color: var(--text-strong); font-weight: var(--weight-semibold); }
+ul, ol { margin: 0 0 var(--space-3); padding-left: var(--space-6); }
+li { margin: var(--space-1) 0; }
+li::marker { color: var(--text-subtle); }
+
+/* Mono for figures/IDs/fingerprints inside small/code-like contexts */
+blockquote {
+  margin: var(--space-2) 0;
+  padding: var(--space-2) var(--space-3);
+  border-left: 2px solid var(--border-default);
+  background: var(--surface-sunken);
+  border-radius: var(--radius-xs);
+}
+pre {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  overflow: auto;
+}
+
+/* ---- Buttons ----------------------------------------------------- */
+button {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--text-body);
+  background: var(--surface-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-button);
+  padding: var(--space-1_5) var(--space-3);
+  cursor: pointer;
+  transition: var(--transition-colors);
+  line-height: 1.4;
+}
+button:hover:not(:disabled) { background: var(--surface-hover); border-color: var(--border-strong); }
+button:active:not(:disabled) { background: var(--surface-active); }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Primary CTA — solid brand, used on key actions via class */
+button.primary, .kb-primary {
+  color: var(--text-on-accent);
+  background: var(--brand);
+  border-color: transparent;
+  font-weight: var(--weight-semibold);
+  padding: var(--space-2) var(--space-5);
+}
+button.primary:hover:not(:disabled), .kb-primary:hover:not(:disabled) {
+  background: var(--brand-hover);
+}
+
+/* Tiny inline buttons (override / reset / revert / ✎ / copy) */
+button.kb-mini {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-mono);
+  padding: 1px var(--space-1_5);
+  color: var(--text-link);
+  background: transparent;
+  border-color: transparent;
+}
+button.kb-mini:hover:not(:disabled) { background: var(--accent-soft); text-decoration: none; }
+
+/* ---- Form fields ------------------------------------------------- */
+input[type="text"], input[type="email"], input[type="password"], input[type="number"],
+input:not([type]), textarea, select {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  color: var(--text-strong);
+  background: var(--surface-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-input);
+  padding: var(--space-2) var(--space-3);
+  transition: var(--transition-colors);
+}
+textarea { line-height: var(--leading-normal); resize: vertical; }
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: var(--ring);
+}
+input::placeholder, textarea::placeholder { color: var(--text-subtle); }
+label { font-size: var(--text-sm); color: var(--text-body); }
+input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
+fieldset {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  padding: var(--space-4);
+  margin: 0 0 var(--space-4);
+}
+legend {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--text-subtle);
+  padding: 0 var(--space-2);
+}
+
+/* ---- Tables (financial vocabulary) ------------------------------- */
+table { border-collapse: collapse; font-variant-numeric: tabular-nums; margin: 0 0 var(--space-4); }
+/* neutralize the legacy border="1" attribute the app passes */
+table[border] td, table[border] th { border: none; }
+th {
+  text-align: left;
+  font-family: var(--font-sans);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: var(--space-1_5) var(--space-3);
+}
+thead tr { border-bottom: 2px solid var(--text-strong); }
+td {
+  padding: var(--space-1_5) var(--space-3);
+  font-size: var(--text-sm);
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: top;
+}
+tbody tr:hover { background: var(--surface-hover); }
+/* numeric cells + in-cell number inputs read as a spreadsheet (mono, tight) */
+td .kb-data, td.kb-num { font-family: var(--font-mono); text-align: right; letter-spacing: var(--tracking-mono); }
+td input[type="number"], td input[type="text"] {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  text-align: right;
+  padding: 2px var(--space-1_5);
+  letter-spacing: var(--tracking-mono);
+}
+td input[type="text"]:not([size="40"]) { text-align: left; }
+
+/* ---- Collapsible sections (the app uses <details> heavily) -------- */
+details {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-4) var(--space-5);
+  margin: 0 0 var(--space-3);
+}
+details > summary {
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-weight: var(--weight-semibold);
+  color: var(--text-strong);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+details > summary::-webkit-details-marker { display: none; }
+details > summary::before {
+  content: "";
+  width: 0; height: 0;
+  border-left: 5px solid var(--text-subtle);
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  transition: var(--transition-transform);
+}
+details[open] > summary::before { transform: rotate(90deg); }
+/* nested details flatten (no card-in-card) */
+details details { box-shadow: none; background: var(--surface-sunken); }
+
+/* ---- Links & rules ----------------------------------------------- */
+hr { border-top: 1px solid var(--border-subtle); margin: var(--space-6) 0; }
+
+/* ---- Confidence badge as a chip (component renders these) -------- */
+.kb-conf { cursor: pointer; border: none; }
+.kb-conf-rationale { margin-top: var(--space-1); }
+
+/* ---- Basis tag (filed fact / estimate / inference / user) -------- */
+.kb-basis {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+  color: var(--text-subtle);
+  padding: 1px var(--space-1_5);
+  border-radius: var(--radius-xs);
+  background: var(--surface-sunken);
+}
+.kb-basis--estimate, .kb-basis--inference { color: var(--accent); background: var(--accent-soft); }
+
+/* ---- Top navigation bar ------------------------------------------ */
+.kb-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-3) var(--gutter);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-card);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.kb-nav a { color: var(--text-body); font-size: var(--text-sm); font-weight: var(--weight-medium); }
+.kb-nav a:hover { color: var(--text-strong); text-decoration: none; }
+.kb-nav .kb-nav-spacer { flex: 1; }
+
+/* ---- Wordmark ---------------------------------------------------- */
+.kb-wordmark {
+  font-family: var(--font-mono);
+  font-weight: var(--weight-medium);
+  font-size: var(--text-md);
+  letter-spacing: -0.015em;
+  color: var(--text-strong);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.kb-wordmark .dot { color: var(--accent); }
