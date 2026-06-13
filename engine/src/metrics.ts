@@ -32,7 +32,7 @@ export async function computeMetrics(
   const result = await provider.streamText({
     system,
     messages: [{ role: "user", content: request }],
-    pass: config.models.passes.chat,
+    pass: config.models.passes.metrics,
     onDelta,
   });
 

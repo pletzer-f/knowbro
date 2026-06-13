@@ -5,6 +5,17 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { PassUsage } from "./types";
 import type { PassModelConfig } from "./config";
 
+// Adaptive thinking + the effort parameter are supported on Opus 4.5+ / Sonnet
+// 4.6 / Fable 5, but NOT on Haiku or older models (they 400). Build the
+// thinking/output_config knobs per model so a cheap-model choice in
+// models.json degrades gracefully instead of erroring.
+function tuning(pass: PassModelConfig, extra: Record<string, unknown> = {}) {
+  const supportsAdaptive = !/haiku|claude-3/.test(pass.model);
+  return supportsAdaptive
+    ? { thinking: { type: "adaptive" as const }, output_config: { effort: pass.effort, ...extra } }
+    : { output_config: { ...extra } };
+}
+
 export interface StructuredCall {
   system: string;
   user: string;
@@ -61,15 +72,11 @@ class AnthropicProvider implements LlmProvider {
     const stream = this.client.messages.stream({
       model: call.pass.model,
       max_tokens: call.pass.maxTokens,
-      thinking: { type: "adaptive" },
-      output_config: {
-        effort: call.pass.effort,
-        format: { type: "json_schema", schema: call.schema as Record<string, unknown> },
-      },
+      ...tuning(call.pass, { format: { type: "json_schema", schema: call.schema as Record<string, unknown> } }),
       // System prompt is stable across calls within a pass type — cache it.
       system: [{ type: "text", text: call.system, cache_control: { type: "ephemeral" } }],
       messages: [{ role: "user", content: call.user }],
-    });
+    } as Anthropic.MessageStreamParams);
 
     let message;
     try {
@@ -132,15 +139,14 @@ class AnthropicProvider implements LlmProvider {
       const stream = this.client.messages.stream({
         model: call.pass.model,
         max_tokens: call.pass.maxTokens,
-        thinking: { type: "adaptive" },
-        output_config: { effort: call.pass.effort },
+        ...tuning(call.pass),
         system: [{ type: "text", text: call.system, cache_control: { type: "ephemeral" } }],
         messages,
         tools: [
           { type: "web_search_20260209", name: "web_search", max_uses: 12 },
           { type: "web_fetch_20260209", name: "web_fetch", max_uses: 15 },
         ],
-      });
+      } as Anthropic.MessageStreamParams);
 
       stream.on("text", (delta) => {
         text += delta;
@@ -172,11 +178,10 @@ class AnthropicProvider implements LlmProvider {
     const stream = this.client.messages.stream({
       model: call.pass.model,
       max_tokens: call.pass.maxTokens,
-      thinking: { type: "adaptive" },
-      output_config: { effort: call.pass.effort },
+      ...tuning(call.pass),
       system: [{ type: "text", text: call.system, cache_control: { type: "ephemeral" } }],
       messages: call.messages.map((m) => ({ role: m.role, content: m.content })),
-    });
+    } as Anthropic.MessageStreamParams);
 
     stream.on("text", (delta) => call.onDelta(delta));
 

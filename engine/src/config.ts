@@ -46,6 +46,7 @@ export interface ModelsConfig {
     revise: PassModelConfig;
     chat: PassModelConfig;
     gather: PassModelConfig;
+    metrics: PassModelConfig;
   };
 }
 

@@ -58,6 +58,7 @@ export default function AnalysePage() {
   const [savedId, setSavedId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [chatTranscript, setChatTranscript] = useState<ChatMsg[]>([]);
+  const [quickScan, setQuickScan] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -171,7 +172,7 @@ export default function AnalysePage() {
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ companyName, rawData, userNotes }),
+        body: JSON.stringify({ companyName, rawData, userNotes, quickScan }),
       });
       if (!res.ok || !res.body) {
         const json = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
@@ -339,25 +340,41 @@ export default function AnalysePage() {
         <div>
           <h3>{companyName}</h3>
           {!result && !loading && (
-            <p>
-              <button type="button" onClick={() => setStep(2)}>
-                ← Back to data
-              </button>{" "}
-              <button type="button" onClick={run}>
-                Run the analysis (≈5–10 minutes, ~€1–2)
-              </button>
-            </p>
+            <div>
+              <p>
+                <label>
+                  <input type="checkbox" checked={quickScan} onChange={(e) => setQuickScan(e.target.checked)} /> Quick
+                  scan — draft only, skip the red-team & revision (faster, ~⅓ the cost; for first-look triage)
+                </label>
+              </p>
+              <p>
+                <button type="button" onClick={() => setStep(2)}>
+                  ← Back to data
+                </button>{" "}
+                <button type="button" onClick={run}>
+                  {quickScan ? "Run quick scan (≈3 min)" : "Run full analysis (≈5–10 min)"}
+                </button>
+              </p>
+            </div>
           )}
 
           {(loading || result) && (
             <div>
               <p>
-                {(Object.keys(PHASE_LABELS) as Phase[]).map((p) => (
-                  <span key={p}>
-                    {phaseStates[p] === "done" ? "✓" : phaseStates[p] === "running" ? "▶" : "·"} {PHASE_LABELS[p]}
+                {(Object.keys(PHASE_LABELS) as Phase[])
+                  .filter((p) => !quickScan || p === "draft")
+                  .map((p) => (
+                    <span key={p}>
+                      {phaseStates[p] === "done" ? "✓" : phaseStates[p] === "running" ? "▶" : "·"} {PHASE_LABELS[p]}
+                      <br />
+                    </span>
+                  ))}
+                {quickScan && (
+                  <small>
+                    Quick scan: draft only — no red-team verification. Treat as a first look, not decision-grade.
                     <br />
-                  </span>
-                ))}
+                  </small>
+                )}
                 {loading && <small>running for {elapsed}s...</small>}
               </p>
             </div>

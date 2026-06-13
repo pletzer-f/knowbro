@@ -1,10 +1,12 @@
 {
+  "_note": "draft & revise MUST stay on Opus — they emit the full dossier schema, which only compiles on Opus's structured-output grammar (Sonnet times out; see dossier.schema.json $comment). critique/chat/gather/metrics run on Sonnet to cut cost. Models that lack adaptive thinking + effort (Haiku, claude-3*) are handled gracefully by engine/src/llm.ts but cannot run the gather web-search tools.",
   "provider": "anthropic",
   "passes": {
-    "draft":    { "model": "claude-opus-4-8", "maxTokens": 32000, "effort": "high" },
-    "critique": { "model": "claude-opus-4-8", "maxTokens": 16000, "effort": "high" },
-    "revise":   { "model": "claude-opus-4-8", "maxTokens": 32000, "effort": "high" },
-    "chat":     { "model": "claude-opus-4-8", "maxTokens": 8000,  "effort": "high" },
-    "gather":   { "model": "claude-opus-4-8", "maxTokens": 16000, "effort": "medium" }
+    "draft":    { "model": "claude-opus-4-8",   "maxTokens": 32000, "effort": "high" },
+    "critique": { "model": "claude-sonnet-4-6", "maxTokens": 16000, "effort": "medium" },
+    "revise":   { "model": "claude-opus-4-8",   "maxTokens": 32000, "effort": "high" },
+    "chat":     { "model": "claude-sonnet-4-6", "maxTokens": 8000,  "effort": "medium" },
+    "gather":   { "model": "claude-sonnet-4-6", "maxTokens": 16000, "effort": "medium" },
+    "metrics":  { "model": "claude-sonnet-4-6", "maxTokens": 8000,  "effort": "medium" }
   }
 }

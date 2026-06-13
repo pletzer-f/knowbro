@@ -11,7 +11,7 @@ export const maxDuration = 800;
 //   {"type":"result","result":{...}}   (terminal)
 //   {"type":"error","error":"..."}     (terminal)
 export async function POST(req: NextRequest) {
-  let body: { companyName?: string; rawData?: string; userNotes?: string };
+  let body: { companyName?: string; rawData?: string; userNotes?: string; quickScan?: boolean };
   try {
     body = await req.json();
   } catch {
@@ -37,7 +37,10 @@ export async function POST(req: NextRequest) {
       try {
         const result = await analyze(
           { companyName, rawData, userNotes: body.userNotes },
-          { onProgress: (phase, state) => emit({ type: "progress", phase, state }) }
+          {
+            draftOnly: body.quickScan === true,
+            onProgress: (phase, state) => emit({ type: "progress", phase, state }),
+          }
         );
         emit({ type: "result", result });
       } catch (e) {
