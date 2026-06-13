@@ -9,7 +9,7 @@
 // All presentation decisions come from lens/view config — logic stays in
 // engine/src/lens.ts so a later design pass only has to reskin this file.
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import type {
   Confidence,
   Critique,
@@ -500,7 +500,13 @@ export default function DossierView({
           {dossier.data_period_note} — lens: {lens.label} / {view.label} ({view.tagline})
         </small>
       </p>
-      {lensed.sections.map((s) => renderSection(s.key, s.expandedByDefault, s.title))}
+      <div className="kb-stagger">
+        {lensed.sections.map((s, i) => (
+          <div key={s.key} style={{ "--kb-i": i } as CSSProperties}>
+            {renderSection(s.key, s.expandedByDefault, s.title)}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

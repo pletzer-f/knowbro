@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
     includePeerComps?: boolean;
     isListed?: boolean;
     ticker?: string; // for listed companies: enables SEC EDGAR + market data
+    sourceOverrides?: Record<string, boolean>; // per-run toggles, win over saved prefs
   };
   try {
     body = await req.json();
@@ -28,11 +29,13 @@ export async function POST(req: NextRequest) {
   const companyName = body.companyName?.trim();
   if (!companyName) return NextResponse.json({ error: "companyName is required" }, { status: 400 });
 
-  // Source preferences (default enabled when no row exists).
+  // Source preferences: per-run override (from the console chips) wins over the
+  // user's saved default, which wins over the built-in default (enabled).
   const supabase = await createClient();
   const { data: prefRows } = await supabase.from("source_preferences").select("source_id, enabled");
   const prefs = new Map((prefRows ?? []).map((r) => [r.source_id, r.enabled]));
-  const enabled = (id: string) => prefs.get(id) ?? true;
+  const overrides = body.sourceOverrides ?? {};
+  const enabled = (id: string) => overrides[id] ?? prefs.get(id) ?? true;
 
   const todayIso = new Date().toISOString().slice(0, 10);
   const isUk = /^(uk|united kingdom|gb|great britain|england|scotland|wales)$/i.test(body.country?.trim() ?? "");

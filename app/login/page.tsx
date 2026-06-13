@@ -53,8 +53,8 @@ export default function LoginPage() {
           </label>
         </p>
         <p>
-          <button type="submit" disabled={loading}>
-            {loading ? "Signing in..." : "Sign in"}
+          <button type="submit" className="primary" disabled={loading}>
+            {loading ? "Signing in…" : "Sign in"}
           </button>
         </p>
       </form>

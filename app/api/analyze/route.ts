@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
           { companyName, rawData, userNotes: body.userNotes },
           {
             draftOnly: body.quickScan === true,
-            onProgress: (phase, state) => emit({ type: "progress", phase, state }),
+            onProgress: (phase, state, detail) => emit({ type: "progress", phase, state, detail }),
           }
         );
         emit({ type: "result", result });

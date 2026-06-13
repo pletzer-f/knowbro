@@ -40,10 +40,34 @@ function buildReviseUserPrompt(input: AnalysisInput, draft: Dossier, critique: C
     .join("\n\n---\n\n");
 }
 
+/** Optional detail attached to a progress event, for the live activity feed. */
+export interface ProgressDetail {
+  sections?: number;
+  estimates?: number;
+  findings?: number;
+  highFindings?: number;
+  model?: string;
+  note?: string;
+}
+
 export interface AnalyzeOptions {
   /** Skip the critique+revise passes (debugging / cheap runs only). */
   draftOnly?: boolean;
-  onProgress?: (phase: "draft" | "critique" | "revise", state: "start" | "done") => void;
+  onProgress?: (
+    phase: "draft" | "critique" | "revise",
+    state: "start" | "done",
+    detail?: ProgressDetail
+  ) => void;
+}
+
+function countEstimates(d: Dossier): number {
+  return (
+    d.business_model.estimates.length +
+    d.ownership_control.estimates.length +
+    d.financial_picture.estimates.length +
+    d.capital_structure_health.estimates.length +
+    d.investment_angle.estimates.length
+  );
 }
 
 export async function analyze(input: AnalysisInput, opts: AnalyzeOptions = {}): Promise<AnalysisResult> {
@@ -71,7 +95,11 @@ export async function analyze(input: AnalysisInput, opts: AnalyzeOptions = {}): 
     output: draftRes.output,
     usage: draftRes.usage,
   });
-  opts.onProgress?.("draft", "done");
+  opts.onProgress?.("draft", "done", {
+    sections: 7,
+    estimates: countEstimates(draftRes.output),
+    model: draftRes.model,
+  });
 
   let critique: Critique = { findings: [], overall_assessment: "Critique pass skipped (draftOnly)." };
   let final: Dossier = draftRes.output;
@@ -97,7 +125,12 @@ export async function analyze(input: AnalysisInput, opts: AnalyzeOptions = {}): 
       output: critique,
       usage: critiqueRes.usage,
     });
-    opts.onProgress?.("critique", "done");
+    const highFindings = critique.findings.filter((f) => f.severity === "high").length;
+    opts.onProgress?.("critique", "done", {
+      findings: critique.findings.length,
+      highFindings,
+      model: critiqueRes.model,
+    });
 
     // Pass 3 — revision (only if the reviewer found anything actionable)
     const actionable = critique.findings.filter((f) => f.severity !== "low");
@@ -121,7 +154,9 @@ export async function analyze(input: AnalysisInput, opts: AnalyzeOptions = {}): 
         output: final,
         usage: reviseRes.usage,
       });
-      opts.onProgress?.("revise", "done");
+      opts.onProgress?.("revise", "done", { model: reviseRes.model });
+    } else if (!opts.draftOnly) {
+      opts.onProgress?.("revise", "done", { note: "no material findings — draft stands" });
     }
   }
 

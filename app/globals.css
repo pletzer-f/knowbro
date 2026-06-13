@@ -281,3 +281,136 @@ hr { border-top: 1px solid var(--border-subtle); margin: var(--space-6) 0; }
   gap: var(--space-2);
 }
 .kb-wordmark .dot { color: var(--accent); }
+
+/* ============================================================
+   Motion — quick, confident, no bounce. Brand-sanctioned.
+   ============================================================ */
+@keyframes kb-fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes kb-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes kb-pop {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes kb-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.35; }
+}
+@keyframes kb-draw {
+  from { stroke-dashoffset: 16; }
+  to   { stroke-dashoffset: 0; }
+}
+@keyframes kb-caret {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+
+/* Entry reveals */
+.kb-reveal { animation: kb-fade-up var(--dur-base) var(--ease-out) both; }
+.kb-reveal-fade { animation: kb-fade var(--dur-base) var(--ease-out) both; }
+.kb-pop-in { animation: kb-pop var(--dur-base) var(--ease-out) both; }
+/* Stagger: set --kb-i on each child (0,1,2…) for a cascade */
+.kb-stagger > * { animation: kb-fade-up var(--dur-base) var(--ease-out) both; animation-delay: calc(var(--kb-i, 0) * 60ms); }
+
+/* Live indicators */
+.kb-pulse-dot { animation: kb-pulse 1.1s var(--ease-standard) infinite; }
+.kb-caret::after {
+  content: "▍";
+  margin-left: 1px;
+  color: var(--accent);
+  animation: kb-caret 1s steps(1) infinite;
+}
+
+/* Confidence chips reveal on a freshly rendered dossier */
+.kb-reveal .kb-conf, .kb-reveal-confs .kb-conf { animation: kb-pop var(--dur-base) var(--ease-out) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .kb-reveal, .kb-reveal-fade, .kb-pop-in, .kb-stagger > *,
+  .kb-pulse-dot, .kb-caret::after, .kb-reveal .kb-conf { animation: none; }
+  .kb-caret::after { content: ""; }
+}
+
+/* ============================================================
+   Research console
+   ============================================================ */
+.kb-console-title {
+  font-family: var(--display-font);
+  font-weight: var(--display-weight);
+  font-size: var(--text-3xl);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-strong);
+  transition: color var(--dur-base) var(--ease-standard);
+}
+.kb-console-title.kb-placeholder { color: var(--text-subtle); }
+
+/* Source chips */
+.kb-source-strip { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.kb-source-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-mono);
+  padding: var(--space-1) var(--space-2_5, 10px);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition-colors);
+  user-select: none;
+}
+.kb-source-chip:hover { border-color: var(--border-strong); }
+.kb-source-chip[data-on="true"] { color: var(--text-strong); border-color: var(--border-strong); }
+.kb-source-chip[data-on="false"] { opacity: 0.5; text-decoration: line-through; }
+.kb-source-chip .st { width: 6px; height: 6px; border-radius: var(--radius-pill); background: var(--border-strong); }
+.kb-source-chip[data-state="gathering"] .st { background: var(--accent); }
+.kb-source-chip[data-state="done"] .st { background: var(--confidence-high); }
+
+/* Segmented control (quick ↔ full) */
+.kb-segmented { display: inline-flex; border: 1px solid var(--border-default); border-radius: var(--radius-sm); overflow: hidden; }
+.kb-segmented button {
+  border: none; border-radius: 0; background: var(--surface-card);
+  font-size: var(--text-sm); padding: var(--space-1_5) var(--space-3);
+}
+.kb-segmented button[aria-pressed="true"] { background: var(--brand); color: var(--text-on-accent); }
+
+/* Sticky run bar */
+.kb-runbar {
+  position: sticky; bottom: 0;
+  display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap;
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-md);
+  margin-top: var(--space-5);
+}
+.kb-runbar .kb-runbar-spacer { flex: 1; }
+.kb-cost { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-subtle); letter-spacing: var(--tracking-mono); }
+
+/* Source-pack meter */
+.kb-meter { font-family: var(--font-mono); font-size: var(--text-2xs); color: var(--text-subtle); letter-spacing: var(--tracking-mono); }
+
+/* Activity feed */
+.kb-feed { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.kb-feed li { display: flex; align-items: baseline; gap: var(--space-2); font-size: var(--text-sm); }
+.kb-feed .t { font-family: var(--font-mono); font-size: var(--text-2xs); color: var(--text-subtle); min-width: 52px; }
+.kb-feed .ph { font-family: var(--font-mono); font-size: var(--text-2xs); letter-spacing: var(--tracking-caps); text-transform: uppercase; }
+
+/* Phase tracker */
+.kb-phases { display: flex; flex-direction: column; gap: var(--space-2); margin: var(--space-4) 0; }
+.kb-phase { display: flex; align-items: center; gap: var(--space-3); color: var(--text-muted); }
+.kb-phase[data-state="running"] { color: var(--text-strong); }
+.kb-phase[data-state="done"] { color: var(--text-body); }
+.kb-phase .mk { width: 18px; height: 18px; flex: none; display: inline-flex; align-items: center; justify-content: center; }
+.kb-phase .mk .dot { width: 8px; height: 8px; border-radius: var(--radius-pill); background: var(--border-strong); }
+.kb-phase[data-state="running"] .mk .dot { background: var(--accent); }
+.kb-phase[data-state="done"] .mk svg { color: var(--confidence-high); }

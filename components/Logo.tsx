@@ -17,7 +17,9 @@ export default function Logo({ markSize = 26 }: { markSize?: number }) {
   return (
     <span className="kb-wordmark">
       <LogoMark size={markSize} />
-      knowbro<span className="dot">.</span>
+      <span>
+        knowbro<span className="dot">.</span>
+      </span>
     </span>
   );
 }
