@@ -6,7 +6,8 @@
     "critique": { "model": "claude-sonnet-4-6", "maxTokens": 16000, "effort": "medium" },
     "revise":   { "model": "claude-opus-4-8",   "maxTokens": 32000, "effort": "high" },
     "chat":     { "model": "claude-sonnet-4-6", "maxTokens": 8000,  "effort": "medium" },
-    "gather":   { "model": "claude-sonnet-4-6", "maxTokens": 16000, "effort": "medium" },
+    "_gather_note": "Gather MUST stay on Opus: it runs a web-search agentic loop and needs the model to decide when to STOP searching and synthesize the pack. Sonnet (esp. with thinking off) searches endlessly and never writes — verified empty packs. Opus+adaptive-thinking produced full packs reliably.",
+    "gather":   { "model": "claude-opus-4-8",   "maxTokens": 16000, "effort": "medium" },
     "metrics":  { "model": "claude-sonnet-4-6", "maxTokens": 8000,  "effort": "medium" }
   }
 }
