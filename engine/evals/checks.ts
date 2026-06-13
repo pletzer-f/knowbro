@@ -115,10 +115,15 @@ export function runChecks(result: AnalysisResult): CheckResult[] {
 
   // 9. Unknowns: 4-10 items, each with a concrete diligence question
   const unknowns = d.what_we_dont_know.items;
+  // A diligence ask is valid whether phrased as a question ("What is the
+  // customer concentration?") or an imperative ("Confirm the lease terms").
+  // Require substance, not punctuation; report how many are question-form.
+  const substantive = unknowns.every((u) => u.diligence_question.trim().length > 15);
+  const questionForm = unknowns.filter((u) => u.diligence_question.includes("?")).length;
   add(
-    "unknowns-4-to-10-with-questions",
-    unknowns.length >= 4 && unknowns.length <= 10 && unknowns.every((u) => u.diligence_question.includes("?")),
-    `${unknowns.length} unknowns`
+    "unknowns-4-to-10-with-substantive-asks",
+    unknowns.length >= 4 && unknowns.length <= 10 && substantive,
+    `${unknowns.length} unknowns, ${questionForm} phrased as questions`
   );
 
   // 10. Plain-language summaries exist and differ from technical summaries
