@@ -2,7 +2,9 @@
 
 Company-analysis app whose value lives in one component: the **reasoning engine** that turns sparse public data into a confidence-tagged investment dossier. Everything else is plumbing. The UI is deliberately unstyled until a separate design pass.
 
-## Status: Phase 3 complete (engine + auth + per-user data + chat)
+**Live:** https://wba-company-intel.vercel.app (Vercel Pro, invite-only). Deploys automatically on push to `main` (repo: `pletzer-f/knowbro`). Local dev unchanged: `npm run dev`.
+
+## Status: v1 feature-complete, deployed (engine + auth + data + chat + live data + PDF export)
 
 Phase 1: inference chains, 7-section structured dossier schema, confidence logic, lens system with depth views (investor: Espresso / Boardroom / Deep Dive), self-critique (red-team) pass, reasoning traces, eval harness, functional input/output UI.
 
