@@ -5,6 +5,13 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 export async function middleware(request: NextRequest) {
+  // The monitoring cron is a server-to-server call (Vercel Cron sends a
+  // Bearer CRON_SECRET, no user session) and does its own auth in the route —
+  // it must bypass the session gate, or it's 401'd before it can run.
+  if (request.nextUrl.pathname.startsWith("/api/cron/")) {
+    return NextResponse.next({ request });
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
