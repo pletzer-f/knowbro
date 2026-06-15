@@ -4,7 +4,7 @@
 // (lib/model.ts) — it recalculates on every keystroke. The promptable metrics
 // area at the bottom is the only LLM-backed part.
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Dossier } from "@/engine/src/types";
 import {
   defaultParams,
@@ -26,6 +26,11 @@ interface CustomMetric {
 const fmt = (n: number, digits = 1) =>
   Number.isFinite(n) ? n.toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits }) : "—";
 
+// Robust number editor: native spinners are hidden (see globals.css) so they
+// can't overlap the digits; a local text buffer lets you clear and retype
+// freely (the old parseFloat||0 forced 0 the moment the field went empty).
+// Keyboard ↑/↓ still step by `step`. Commits the parsed number live; on blur,
+// an empty/invalid field snaps back to the last good value.
 function NumInput({
   value,
   onChange,
@@ -37,13 +42,28 @@ function NumInput({
   step?: number;
   width?: number;
 }) {
+  const [text, setText] = useState(String(value));
+  useEffect(() => {
+    // Re-sync when the value changes externally (seed, reset) and isn't mid-edit.
+    if (parseFloat(text) !== value) setText(Number.isFinite(value) ? String(value) : "0");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
   return (
     <input
       type="number"
-      value={Number.isFinite(value) ? value : 0}
+      className="kb-num-input"
+      value={text}
       step={step}
-      onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
-      style={{ width: `${width}ch` }}
+      style={{ width: `calc(${width}ch + 1.4rem)` }}
+      onChange={(e) => {
+        setText(e.target.value);
+        const n = parseFloat(e.target.value);
+        if (Number.isFinite(n)) onChange(n);
+      }}
+      onBlur={() => {
+        const n = parseFloat(text);
+        setText(Number.isFinite(n) ? String(n) : String(value));
+      }}
     />
   );
 }

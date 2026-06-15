@@ -190,16 +190,24 @@ td {
   vertical-align: top;
 }
 tbody tr:hover { background: var(--surface-hover); }
-/* numeric cells + in-cell number inputs read as a spreadsheet (mono, tight) */
+/* numeric cells read as a spreadsheet (mono, right-aligned) */
 td .kb-data, td.kb-num { font-family: var(--font-mono); text-align: right; letter-spacing: var(--tracking-mono); }
-td input[type="number"], td input[type="text"] {
+td input[type="text"]:not([size="40"]) { text-align: left; }
+
+/* Hide native number spinners everywhere — they overlap and clip tight inputs.
+   Stepping still works via the keyboard ↑/↓ keys when the field is focused. */
+input[type="number"] { -moz-appearance: textfield; }
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* The financial-model number editor: mono, right-aligned, comfortable. */
+.kb-num-input {
   font-family: var(--font-mono);
   font-size: var(--text-sm);
   text-align: right;
-  padding: 2px var(--space-1_5);
+  padding: var(--space-1) var(--space-2);
   letter-spacing: var(--tracking-mono);
 }
-td input[type="text"]:not([size="40"]) { text-align: left; }
 
 /* ---- Collapsible sections (the app uses <details> heavily) -------- */
 details {
