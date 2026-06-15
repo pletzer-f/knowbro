@@ -47,6 +47,7 @@ export interface ModelsConfig {
     chat: PassModelConfig;
     gather: PassModelConfig;
     metrics: PassModelConfig;
+    triage: PassModelConfig;
   };
 }
 
@@ -57,8 +58,10 @@ export interface EngineConfig {
   chatSystemPrompt: string;
   metricsSystemPrompt: string;
   gatherSystemPrompt: string;
+  triageSystemPrompt: string;
   dossierSchema: object;
   critiqueSchema: object;
+  triageSchema: object;
   models: ModelsConfig;
   lenses: LensConfig[];
   /** sha256 over all config inputs — recorded in every trace so output quality
@@ -82,9 +85,11 @@ export function loadEngineConfig(): EngineConfig {
   const chatPrompt = read("prompts/chat.md");
   const metricsPrompt = read("prompts/metrics.md");
   const gatherPrompt = read("prompts/gather.md");
+  const triagePrompt = read("prompts/triage.md");
 
   const dossierSchema = stripSchemaComments(JSON.parse(read("schema/dossier.schema.json")));
   const critiqueSchema = stripSchemaComments(JSON.parse(read("schema/critique.schema.json")));
+  const triageSchema = stripSchemaComments(JSON.parse(read("schema/triage.schema.json")));
   const models: ModelsConfig = JSON.parse(read("models.json"));
 
   const lensesDir = path.join(CONFIG_DIR, "lenses");
@@ -110,8 +115,10 @@ export function loadEngineConfig(): EngineConfig {
     chatPrompt,
     metricsPrompt,
     gatherPrompt,
+    triagePrompt,
     JSON.stringify(dossierSchema),
     JSON.stringify(critiqueSchema),
+    JSON.stringify(triageSchema),
     JSON.stringify(models),
   ].join("\n");
   const fingerprint = crypto.createHash("sha256").update(fingerprintInput).digest("hex").slice(0, 12);
@@ -123,8 +130,10 @@ export function loadEngineConfig(): EngineConfig {
     chatSystemPrompt: stripComments(chatPrompt),
     metricsSystemPrompt: stripComments(metricsPrompt),
     gatherSystemPrompt: stripComments(gatherPrompt),
+    triageSystemPrompt: stripComments(triagePrompt),
     dossierSchema,
     critiqueSchema,
+    triageSchema,
     models,
     lenses,
     fingerprint,

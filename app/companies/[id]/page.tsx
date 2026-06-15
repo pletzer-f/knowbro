@@ -8,6 +8,7 @@ import Link from "next/link";
 import type { Dossier } from "@/engine/src/types";
 import type { ModelParams } from "@/lib/model";
 import ModelPanel from "@/components/ModelPanel";
+import MonitorPanel from "@/components/MonitorPanel";
 
 interface CompanyPayload {
   company: { id: string; name: string; created_at: string };
@@ -82,6 +83,9 @@ export default function CompanyPage({ params }: { params: Promise<{ id: string }
         initialMetrics={data.model?.custom_metrics ?? []}
         latestDossier={data.latest_dossier}
       />
+
+      <hr />
+      <MonitorPanel companyId={data.company.id} hasDossier={data.dossiers.length > 0} />
 
       <hr />
       <h3>Dossiers</h3>

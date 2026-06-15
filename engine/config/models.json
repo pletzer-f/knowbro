@@ -8,6 +8,8 @@
     "chat":     { "model": "claude-sonnet-4-6", "maxTokens": 8000,  "effort": "medium" },
     "_gather_note": "Gather MUST stay on Opus: it runs a web-search agentic loop and needs the model to decide when to STOP searching and synthesize the pack. Sonnet (esp. with thinking off) searches endlessly and never writes — verified empty packs. Opus+adaptive-thinking produced full packs reliably.",
     "gather":   { "model": "claude-opus-4-8",   "maxTokens": 16000, "effort": "medium" },
-    "metrics":  { "model": "claude-sonnet-4-6", "maxTokens": 8000,  "effort": "medium" }
+    "metrics":  { "model": "claude-sonnet-4-6", "maxTokens": 8000,  "effort": "medium" },
+    "_triage_note": "Monitoring triage compares two packs and only flags material change — cheap and frequent, so Haiku. No web tools, small schema; thinking/effort are omitted for Haiku by llm.ts.",
+    "triage":   { "model": "claude-haiku-4-5",  "maxTokens": 4000,  "effort": "low" }
   }
 }

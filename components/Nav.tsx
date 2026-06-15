@@ -22,6 +22,7 @@ export default function Nav() {
       </Link>
       <Link href="/">Companies</Link>
       <Link href="/analyse">Research</Link>
+      <Link href="/changes">Changes</Link>
       <Link href="/settings">Sources</Link>
       <Link href="/account">Account</Link>
       <span className="kb-nav-spacer" />

@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "changes": {
+      "type": "array",
+      "description": "Genuine, material-or-notable changes between the previous and new pack. Empty if nothing real changed.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "field": { "type": "string", "description": "What changed, e.g. 'charges register', 'managing director', 'filed revenue'" },
+          "summary": { "type": "string", "description": "One line: what changed" },
+          "old": { "type": "string", "description": "Previous value/state ('' if newly appeared)" },
+          "new": { "type": "string", "description": "New value/state" },
+          "materiality": { "type": "string", "enum": ["high", "medium", "low", "none"] }
+        },
+        "required": ["field", "summary", "old", "new", "materiality"],
+        "additionalProperties": false
+      }
+    },
+    "overall_materiality": { "type": "string", "enum": ["high", "medium", "low", "none"] },
+    "recommendation": { "type": "string", "description": "One line: re-analyse or not, and why" }
+  },
+  "required": ["changes", "overall_materiality", "recommendation"],
+  "additionalProperties": false
+}
