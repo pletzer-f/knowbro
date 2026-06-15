@@ -61,8 +61,10 @@ class AnthropicProvider implements LlmProvider {
   private client: Anthropic;
 
   constructor() {
-    // Reads ANTHROPIC_API_KEY from the environment.
-    this.client = new Anthropic();
+    // Reads ANTHROPIC_API_KEY from the environment. maxRetries raised from the
+    // default 2 → 5: 429/5xx/529(overloaded) auto-retry with exponential
+    // backoff, so transient overloads usually self-heal before the user sees them.
+    this.client = new Anthropic({ maxRetries: 5 });
   }
 
   async completeStructured<T>(call: StructuredCall): Promise<StructuredResult<T>> {

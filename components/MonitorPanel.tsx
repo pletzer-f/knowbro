@@ -6,6 +6,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { friendlyError } from "@/lib/friendlyError";
 
 interface DossierDelta {
   verdict_changed?: boolean;
@@ -108,7 +109,7 @@ export default function MonitorPanel({ companyId, hasDossier }: { companyId: str
       }
       load();
     } catch (e) {
-      setError((e as Error).message);
+      setError(friendlyError((e as Error).message));
     } finally {
       setChecking(false);
       setPhase(null);

@@ -12,6 +12,7 @@ import { withEdit, type DossierEdits } from "@/lib/edits";
 import DossierView, { CritiquePanel, ConfidenceBadge, type Overrides } from "@/components/DossierView";
 import ChatPanel, { type ChatMsg } from "@/components/ChatPanel";
 import CountUp from "@/components/CountUp";
+import { friendlyError } from "@/lib/friendlyError";
 
 import investorLens from "@/engine/config/lenses/investor.json";
 import entrepreneurLens from "@/engine/config/lenses/entrepreneur.json";
@@ -230,7 +231,7 @@ export default function ResearchConsole() {
         return next;
       });
     } catch (err) {
-      setError((err as Error).message);
+      setError(friendlyError((err as Error).message));
     } finally {
       setGathering(false);
     }
@@ -300,7 +301,7 @@ export default function ResearchConsole() {
         }
       }
     } catch (err) {
-      setError((err as Error).message);
+      setError(friendlyError((err as Error).message));
     } finally {
       setLoading(false);
     }
